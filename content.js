@@ -618,10 +618,8 @@ function restoreAndPause() {
 
 function removePauseAndResume() {
   document.documentElement.classList.remove('bilibili-less-paused');
-  injectCSS(); // 重新注入 CSS
-  cleanup();
-  startObserver();
-  if (!cleanInterval) cleanInterval = setInterval(cleanup, 2000);
+  // 刷新页面，让 CSS 在 document_start 重新注入，确保功能完整生效
+  window.location.reload();
 }
 
 // 监听从 popup 传来的启用状态变化
