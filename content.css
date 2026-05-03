@@ -1,0 +1,319 @@
+/* ============================================
+   Bilibili Less - Static CSS
+   由 content.js 在 document_start 动态注入
+   ============================================ */
+
+/* ======== 动态页 (t.bilibili.com) ======== */
+
+/* 搜索栏容器 - 精确类名 */
+.bili-header__search,
+.nav-search-box,
+.bili-header__bar .search-bar,
+.search-panel {
+  display: none !important;
+}
+
+/* 搜索建议弹出框 */
+.search-panel-popover,
+.suggest-box {
+  display: none !important;
+}
+
+/* 热搜列表 */
+.hot-search,
+.trending,
+.trending-entry {
+  display: none !important;
+}
+
+/* 顶部导航栏 */
+.bili-header__channel,
+.bili-header__bar .nav-container {
+  display: none !important;
+}
+
+/* ===== 动态页专用宽泛匹配（限定作用域，不泄漏到其他页面） ===== */
+
+/* 搜索栏/导航/热搜 - 宽泛匹配当前B站CSS Modules类名 */
+html.bilibili-less-dynamic-page [class*="search-bar"],
+html.bilibili-less-dynamic-page [class*="header-search"],
+html.bilibili-less-dynamic-page [class*="search-wrapper"] {
+  display: none !important;
+}
+
+html.bilibili-less-dynamic-page [class*="hot-list"],
+html.bilibili-less-dynamic-page [class*="sidebar-hot"],
+html.bilibili-less-dynamic-page [class*="rank-list"] {
+  display: none !important;
+}
+
+html.bilibili-less-dynamic-page [class*="header-nav"],
+html.bilibili-less-dynamic-page [class*="channel-menu"],
+html.bilibili-less-dynamic-page [class*="nav-menu"],
+html.bilibili-less-dynamic-page [class*="nav-link"],
+html.bilibili-less-dynamic-page [class*="nav-item"],
+html.bilibili-less-dynamic-page [class*="channel-link"],
+html.bilibili-less-dynamic-page [class*="channel-item"],
+html.bilibili-less-dynamic-page [class*="menu-link"],
+html.bilibili-less-dynamic-page [class*="menu-item"],
+html.bilibili-less-dynamic-page [class*="header-link"],
+html.bilibili-less-dynamic-page [class*="header-item"],
+html.bilibili-less-dynamic-page [class*="top-nav"],
+html.bilibili-less-dynamic-page [class*="top-tab"],
+html.bilibili-less-dynamic-page [class*="main-nav"],
+html.bilibili-less-dynamic-page [class*="primary-nav"],
+html.bilibili-less-dynamic-page [class*="sub-nav"],
+html.bilibili-less-dynamic-page [class*="link-item"],
+html.bilibili-less-dynamic-page [class*="tab-link"],
+html.bilibili-less-dynamic-page [class*="tab-item"] {
+  display: none !important;
+}
+
+/* logo旁的下拉触发器 */
+html.bilibili-less-dynamic-page [class*="logo"] [class*="arrow"],
+html.bilibili-less-dynamic-page [class*="logo"] [class*="trigger"],
+html.bilibili-less-dynamic-page [class*="logo"] [class*="expand"],
+html.bilibili-less-dynamic-page [class*="brand"] [class*="arrow"],
+html.bilibili-less-dynamic-page [class*="brand"] [class*="trigger"],
+html.bilibili-less-dynamic-page [class*="brand"] [class*="expand"] {
+  display: none !important;
+}
+
+/* 悬停弹出框/提示框（不隐藏按钮本身） */
+html.bilibili-less-dynamic-page [role="tooltip"],
+html.bilibili-less-dynamic-page [class*="tooltip"],
+html.bilibili-less-dynamic-page [class*="hover-pop"],
+html.bilibili-less-dynamic-page [class*="hover-box"],
+html.bilibili-less-dynamic-page [class*="hover-card"],
+html.bilibili-less-dynamic-page [class*="popup-box"],
+html.bilibili-less-dynamic-page [class*="tip-box"],
+html.bilibili-less-dynamic-page [class*="hover-tip"],
+html.bilibili-less-dynamic-page [class*="hover-panel"],
+html.bilibili-less-dynamic-page [class*="float-tip"],
+html.bilibili-less-dynamic-page [class*="float-pop"],
+html.bilibili-less-dynamic-page [class*="overlay-tip"] {
+  display: none !important;
+}
+
+/* 搜索栏内提示词/占位符清除 */
+html.bilibili-less-dynamic-page input::placeholder,
+html.bilibili-less-dynamic-page input::-webkit-input-placeholder {
+  color: transparent !important;
+}
+
+/* 通知小红点 - 精确选择 */
+.bili-header__bar .msg-num,
+.bili-header__bar .notice-num {
+  display: none !important;
+}
+
+/* 横幅广告/推广 */
+.bili-dyn-banner,
+.banner-wrap,
+.home-tips-con,
+.bili-banner,
+.popularize {
+  display: none !important;
+}
+
+/* 下载客户端提示 */
+.download-entry,
+.download-tips,
+.app-download-tip,
+.bili-header__download {
+  display: none !important;
+}
+
+/* 动态卡片内部操作按钮栏 - 精确子元素选择 */
+.bili-dyn-list__item .bili-dyn-actions,
+.bili-dyn-card .ops {
+  display: none !important;
+}
+
+/* 动态卡片评论预览区域 */
+.bili-dyn-list__item .bili-dyn-comment {
+  display: none !important;
+}
+
+/* 社交证明：X人觉得很赞等 */
+.bili-dyn-list__item .bili-dyn-liked {
+  display: none !important;
+}
+
+/* 非视频动态类型过滤（data-type 属性选择） */
+.bili-dyn-list__item[data-type="2"],
+.bili-dyn-list__item[data-type="4"],
+.bili-dyn-list__item[data-type="8"] {
+  display: none !important;
+}
+
+/* 带商品/广告标记的动态 */
+.bili-dyn-list__item:has([data-type="goods"]) {
+  display: none !important;
+}
+
+/* ======== 视频页 (www.bilibili.com/video/*) ======== */
+
+/* 视频信息区域 */
+.video-info-container,
+.video-title,
+.video-data,
+.up-info-container,
+.video-attr {
+  display: none !important;
+}
+
+/* 点赞/投币/收藏/分享 */
+.video-toolbar,
+.video-toolbar-left,
+.video-toolbar-right {
+  display: none !important;
+}
+
+/* 右侧推荐列表 */
+.recommend-list,
+.recommend-list-v1,
+.recommend-list-v2,
+.video-page-aside,
+.aside-container {
+  display: none !important;
+}
+
+/* 评论区 */
+.reply-wrap,
+.reply-container,
+.comment-area,
+.reply-area,
+.root-reply-container {
+  display: none !important;
+}
+
+/* 视频结束覆盖层 */
+.bpx-player-ending,
+.bpx-player-ending-related,
+.bpx-player-ending-content,
+.bpx-player-ending-countdown,
+.bpx-player-ending-more {
+  display: none !important;
+}
+
+/* 视频描述/标签 */
+.video-desc,
+.video-description,
+.video-tag,
+.tag-container {
+  display: none !important;
+}
+
+/* 弹幕层 */
+.bpx-player-danmaku,
+.bpx-danmaku-container,
+.danmaku-container {
+  display: none !important;
+}
+
+/* 弹幕设置/开关 */
+.bpx-player-control-dm,
+.bpx-player-dm-switch {
+  display: none !important;
+}
+
+/* 播放列表/合集 */
+.video-playlist,
+.playlist-container {
+  display: none !important;
+}
+
+/* 直播推荐 */
+.live-room,
+.live-up-card {
+  display: none !important;
+}
+
+/* 商品/推广 */
+.goods-container {
+  display: none !important;
+}
+
+/* 弹幕输入框 */
+.bpx-player-dm-input,
+.bpx-player-dm-input-wrap {
+  display: none !important;
+}
+
+/* ---- 限制视频尺寸调节：只允许全屏和真全屏 ---- */
+
+/* 隐藏宽屏模式按钮 */
+.bpx-player-ctrl-wide {
+  display: none !important;
+}
+
+/* 隐藏小窗播放按钮 */
+.bpx-player-ctrl-mini {
+  display: none !important;
+}
+
+/* 播放器容器最大化（正常文档流内最大化） */
+.bpx-player-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* ======== 视频页额外隐藏元素（仅在视频页生效）======= */
+
+/* 顶部导航栏：首页/番剧/直播/活动等链接 */
+html.bilibili-less-video-page .bili-header__channel,
+html.bilibili-less-video-page .bili-header__bar .nav-container,
+html.bilibili-less-video-page .header-nav,
+html.bilibili-less-video-page .nav-link,
+html.bilibili-less-video-page [class*="header-nav"],
+html.bilibili-less-video-page [class*="nav-link"],
+html.bilibili-less-video-page [class*="nav-item"] {
+  display: none !important;
+}
+
+/* 右侧弹幕列表面板 */
+html.bilibili-less-video-page .danmaku-list,
+html.bilibili-less-video-page .dm-list,
+html.bilibili-less-video-page [class*="danmaku-list"],
+html.bilibili-less-video-page [class*="dm-list"] {
+  display: none !important;
+}
+
+/* 视频下方广播/公告 */
+html.bilibili-less-video-page [class*="broadcast"],
+html.bilibili-less-video-page [class*="notice-bar"],
+html.bilibili-less-video-page [class*="announce"] {
+  display: none !important;
+}
+
+/* 视频下方活动/推广 */
+html.bilibili-less-video-page [class*="activity-entry"],
+html.bilibili-less-video-page [class*="activity-panel"],
+html.bilibili-less-video-page [class*="promote-entry"] {
+  display: none !important;
+}
+
+/* ======== visibility 兜底：隐藏所有非播放器内容 ======== */
+html.bilibili-less-video-page {
+  background-color: var(--bilibili-bg, #0d0d0d) !important;
+}
+
+html.bilibili-less-video-page body {
+  visibility: hidden !important;
+}
+
+html.bilibili-less-video-page .bpx-player-container,
+html.bilibili-less-video-page .bpx-player-container * {
+  visibility: visible !important;
+}
+
+/* 已在 display:none 中隐藏的播放器子元素保持不变 */
+html.bilibili-less-video-page .bpx-player-danmaku,
+html.bilibili-less-video-page .bpx-danmaku-container,
+html.bilibili-less-video-page .danmaku-container,
+html.bilibili-less-video-page .bpx-player-dm-input,
+html.bilibili-less-video-page .bpx-player-dm-input-wrap,
+html.bilibili-less-video-page .bpx-player-ending {
+  display: none !important;
+}

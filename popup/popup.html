@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=300">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="logo">Bilibili <span class="highlight">Less</span></h1>
+    <p class="subtitle">抵制注意力工程</p>
+
+    <div class="status-bar">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">运行中</span>
+    </div>
+
+    <label class="switch-row">
+      <span class="switch-label">启用扩展</span>
+      <input type="checkbox" id="enabled" checked>
+    </label>
+
+    <div class="stats" id="statsContainer">
+      <div class="stat-item">
+        <span class="stat-value">—</span>
+        <span class="stat-label">已拦截推荐</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">—</span>
+        <span class="stat-label">已隐藏干扰</span>
+      </div>
+    </div>
+
+    <p class="footer-note">你只应该看你想看的内容</p>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
