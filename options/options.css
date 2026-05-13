@@ -1,0 +1,238 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #202124;
+  background: #f5f7fb;
+}
+
+.page {
+  width: min(980px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 28px 0 40px;
+}
+
+.hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+h1 {
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+p,
+small {
+  color: #6b7280;
+}
+
+.hero p,
+.section-heading p {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.save-status {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e8f7fc;
+  color: #176b87;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.section {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid #e1e5ee;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.section-heading {
+  margin-bottom: 14px;
+}
+
+.preset-grid,
+.module-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.preset-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.module-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.preset-button,
+.primary-button {
+  border: 1px solid #d9dee8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #202124;
+  cursor: pointer;
+  font: inherit;
+}
+
+.preset-button {
+  min-height: 74px;
+  padding: 12px;
+  text-align: left;
+}
+
+.preset-button strong,
+.preset-button small {
+  display: block;
+}
+
+.preset-button strong {
+  font-size: 15px;
+}
+
+.preset-button small {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.preset-button.active {
+  border-color: #00a1d6;
+  background: #e8f7fc;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+  padding: 12px;
+  border: 1px solid #edf0f5;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.switch-row span {
+  min-width: 0;
+}
+
+.switch-row strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.switch-row small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 23px;
+  margin: 0;
+  appearance: none;
+  border-radius: 999px;
+  background: #c6cbd4;
+  cursor: pointer;
+  position: relative;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(32, 33, 36, 0.25);
+  transition: transform 0.18s ease;
+}
+
+input[type="checkbox"]:checked {
+  background: #00a1d6;
+}
+
+input[type="checkbox"]:checked::before {
+  transform: translateX(17px);
+}
+
+textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 142px;
+  padding: 12px;
+  border: 1px solid #d9dee8;
+  border-radius: 8px;
+  font: 13px/1.6 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  color: #202124;
+  background: #fbfcfe;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.primary-button {
+  min-height: 38px;
+  padding: 0 14px;
+  border-color: #00a1d6;
+  background: #00a1d6;
+  color: #ffffff;
+  font-weight: 650;
+}
+
+button:focus-visible,
+textarea:focus-visible,
+input:focus-visible {
+  outline: 2px solid #00a1d6;
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .hero,
+  .module-grid,
+  .preset-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    display: block;
+  }
+
+  .save-status {
+    display: inline-block;
+    margin-top: 12px;
+  }
+}

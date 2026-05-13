@@ -1,192 +1,159 @@
-# Less BiliBili · 少上B站
+# Less BiliBili
 
-> 屏蔽 B 站推荐系统，只保留动态页 → 看视频这一条路径，抵制注意力工程。
->
-> Block Bilibili's recommendation system — keep only the essentials. Resist attention engineering.
+Less BiliBili 是一个 Manifest V3 浏览器扩展，用来把 B 站从“推荐流平台”尽量拉回“主动观看工具”。
 
----
+它保留从关注动态进入视频、正常观看视频的路径，同时隐藏推荐、评论、弹幕、广告、热搜、推广等容易分散注意力的内容。它不是纯播放器模式：视频详情页中的标题、UP 信息、简介、操作栏、选集/合集、宽屏、小窗等正常功能会尽量保留。
 
-## Overview | 概述
+## 功能概览
 
-**Less BiliBili** 是一个 Manifest V3 浏览器扩展，理念是**不控制你、不推荐你、不让你上瘾**。
+默认保留：
 
-B站首页有大量推荐内容、热搜榜、直播推荐、信息流等——这些都是注意力工程的一部分。这个扩展的作用很简单：只保留"关注动态 → 看视频"这条核心路径，其余全部屏蔽。
+| 场景 | 保留内容 |
+| --- | --- |
+| 关注动态 | 查看已关注 UP 的动态更新 |
+| 视频详情页 | 播放器、标题、UP 信息、视频数据、简介、标签、操作栏、选集/合集、宽屏、小窗 |
+| 历史记录 | `www.bilibili.com/history`、`www.bilibili.com/account/history` |
+| 个人空间 | `space.bilibili.com` |
+| 登录相关 | `passport.bilibili.com` |
 
-### 保留了什么
+默认隐藏：
 
-| 功能 | 说明 |
-|------|------|
-| ✅ 动态页 (t.bilibili.com) | 查看关注 UP 主的动态更新 |
-| ✅ 视频播放页 | 观看视频（纯播放器模式） |
-| ✅ 历史记录 | 浏览观看历史 |
-| ✅ 个人空间 (space.bilibili.com) | 访问他人主页 |
-| ✅ 登录相关 (passport.bilibili.com) | 登录/认证不受影响 |
+- 动态页搜索、热搜、非视频动态和社交提示
+- 容易偏离目标的顶部导航入口
+- 视频页右侧推荐、相关视频和推荐接口
+- 视频页评论区
+- 弹幕层、弹幕开关、弹幕输入框、弹幕列表
+- 广告、活动、下载提示、直播推广和商品推广
+- 播放结束后的推荐覆盖层
+- B 站首页和分区页默认跳转到关注动态页
 
-### 屏蔽了什么
+## 模式预设
 
-**页面元素**
-- 搜索栏、热搜榜、推荐列表
-- 顶部导航栏（首页、番剧、直播等）
-- 点赞/投币/收藏/分享按钮栏
-- 评论区、弹幕、弹幕输入框
-- 视频推荐列表、相关视频
-- 视频结束覆盖层（推荐 next up）
-- UP 主信息、视频描述、标签
-- 横幅广告、推广内容、直播推荐
-- 各类悬停弹出框、提示框
+popup 和完整设置页都支持三种预设：
 
-**API 请求**
-- 热门推荐 (`popular`)
-- 首页推荐 feed (`top/feed/rcmd`)
-- 相关视频 (`archive/related`)
-- 分区动态 (`dynamic/region`)
-- 热搜词 (`hotword`)
-- 在线列表 (`online/list`)
-- 广告系统 (`cm.bilibili.com`)
+| 预设 | 说明 |
+| --- | --- |
+| 温和 | 主要隐藏推荐和广告，保留评论、弹幕、导航和自动连播 |
+| 专注 | 默认方案，隐藏主要注意力干扰，并禁用自动连播 |
+| 严格 | 预留给后续更强限制项，目前与专注模式一致 |
 
----
+手动调整任意模块后，当前配置会变为自定义状态。
 
-## Installation | 安装
+## 模块开关
 
-### Chrome / Edge
+| 模块 | 作用 |
+| --- | --- |
+| 启用扩展 | 一键暂停或恢复全部清理逻辑 |
+| 动态页整理 | 收起动态页搜索、热搜、非视频动态和社交提示 |
+| 导航入口 | 隐藏首页、直播、番剧等容易偏航的入口 |
+| 推荐内容 | 隐藏右侧推荐、相关视频和推荐接口 |
+| 评论区 | 隐藏视频页评论区域 |
+| 弹幕功能 | 隐藏弹幕层、开关、输入框和弹幕列表 |
+| 广告推广 | 隐藏广告、活动、下载提示和推广组件 |
+| 结束推荐 | 隐藏播放结束后的推荐覆盖层 |
+| 禁用自动连播 | 视频自然结束后不自动播放下一个内容 |
+| 首页重定向 | 访问首页或分区页时跳回关注动态 |
 
-1. 从 Releases 下载或克隆本仓库
-2. 打开浏览器扩展管理页面：
+推荐内容、动态页整理、广告推广分别对应独立的 DNR 网络规则集。关闭其中某个模块时，不会连带关闭其他网络拦截模块。
+
+## 完整设置页
+
+点击 popup 里的“打开完整设置”，或从浏览器扩展管理页进入选项页，可以打开完整设置页。
+
+完整设置页支持：
+
+- 总开关
+- 模式预设
+- 全部模块开关
+- 页面白名单
+
+## 页面白名单
+
+白名单用于放行某些 B 站页面。匹配白名单后，该页面不会被首页重定向，也不会执行内容清理。
+
+每行一个 URL 或通配符，例如：
+
+```text
+https://www.bilibili.com/
+https://www.bilibili.com/v/popular
+https://www.bilibili.com/video/BV*/
+```
+
+没有 `*` 的条目按 URL 前缀匹配；包含 `*` 的条目按通配符匹配。
+
+## 安装
+
+1. 克隆或下载本仓库。
+2. 打开浏览器扩展管理页：
    - Chrome: `chrome://extensions`
    - Edge: `edge://extensions`
-3. 开启"开发者模式"
-4. 点击"加载已解压的扩展程序"，选择项目文件夹
-5. 完成
+3. 开启开发者模式。
+4. 选择“加载已解压的扩展程序”，加载本项目目录。
 
-### 手动构建（可选）
+## 开发与验证
 
-```bash
-git clone https://github.com/YuanLiu227/Less-BiliBili.git
-```
-
-然后按上述步骤加载 `Less-BiliBili/` 目录。
-
----
-
-## Usage | 使用说明
-
-安装后扩展默认**启用**。
-
-- **启用状态**：打开 B 站时自动拦截推荐 API、隐藏干扰元素。
-- **暂停**：点击扩展图标 → 关闭"启用扩展"开关 → 页面自动刷新恢复原始 B 站。
-- **恢复**：重新打开开关即可。
-- **重定向保护**：尝试访问首页、分区页等非允许页面时，自动跳转到动态页。
-
----
-
-## Permissions | 权限说明
-
-| 权限 | 用途 |
-|------|------|
-| `storage` | 保存扩展开关状态、跨上下文同步设置 |
-| `declarativeNetRequest` | 拦截推荐/广告 API 请求（规则内置，不上传任何数据） |
-| `webNavigation` | 监听页面导航，拦截非允许页面的访问 |
-| `*://*.bilibili.com/*` | 在 B 站域名下执行清理操作 |
-
-扩展**不收集任何数据**，**不发送任何网络请求**（除了浏览器内核执行的 DNR 规则），**不需要任何账号权限**。
-
----
-
-## Technical Details | 技术说明
-
-### 架构
-
-```
-popup/          ← 弹出控制面板（开关）
-  popup.html
-  popup.css
-  popup.js
-
-content.js      ← 注入到页面的脚本（document_start）
-                  - CSS 动态注入/移除（用于隐藏元素）
-                  - MutationObserver 监听 DOM 变化
-                  - SPA 导航拦截
-                  - 文本匹配兜底（B站 CSS Modules 类名变化）
-
-background.js   ← Service Worker
-                  - webNavigation 页面重定向
-                  - DNR 规则集同步
-
-rules.json      ← declarativeNetRequest 规则
-                  - 拦截 7 个推荐/广告 API
-```
-
-### 关键设计决策
-
-1. **CSS 嵌入 JS 而非声明在 manifest.json 中**
-   - 原因：manifest.json 注入的 CSS 无法在运行时移除
-   - 方案：CSS 作为 JS 模板字符串，通过 `<style>` 标签动态注入/移除
-   - 效果：暂停扩展时可彻底恢复 B 站原始样式
-
-2. **两层隐藏机制**
-   - 第一层：`display: none !important` — 精确选择器匹配已知类名
-   - 第二层：`visibility: hidden` + 播放器 `visibility: visible` — 兜底覆盖所有未知元素
-   - 这样即使 B 站更新了类名，视频页依然只显示播放器
-
-3. **文本匹配兜底**
-   - B 站使用 CSS Modules，类名随构建变化
-   - 通过 `TreeWalker` 按文本内容（"首页"、"番剧"等）查找导航项进行隐藏
-
-4. **背景色同步**
-   - 动态页背景色通过 `getComputedStyle` 提取
-   - 存储后应用到视频页，避免全黑背景的不自然感
-
-### 浏览器支持
-
-- Chrome 88+
-- Edge 88+
-- 任何基于 Chromium 的浏览器（Manifest V3）
-
----
-
-## Development | 开发
+静态检查：
 
 ```bash
-git clone https://github.com/YuanLiu227/Less-BiliBili.git
+node --check content.js
+node --check background.js
+node --check popup/popup.js
+node --check options/options.js
+node --check scripts/regression-test.js
+node -e "const fs=require('fs'); for (const f of ['manifest.json','rules_recommendations.json','rules_dynamic.json','rules_ads.json']) JSON.parse(fs.readFileSync(f,'utf8'))"
 ```
 
-修改后：
-1. 在 `chrome://extensions` 点击"重新加载"
-2. 或右键扩展图标 → 管理扩展程序 → 重新加载
+自动回归测试：
 
-### 项目结构
-
-```
-Less-BiliBili/
-├── manifest.json          # 扩展配置文件
-├── content.js             # 内容脚本（CSS注入 + DOM清理）
-├── content.css            # CSS 源文件（编辑用，嵌入在 content.js 中）
-├── background.js          # Service Worker
-├── rules.json             # DNR 规则（API 拦截）
-├── popup/
-│   ├── popup.html         # 弹出面板
-│   ├── popup.css          # 弹出面板样式
-│   └── popup.js           # 弹出面板逻辑
-└── icons/
-    ├── icon16.png
-    ├── icon48.png
-    └── icon128.png
+```bash
+node scripts/regression-test.js
 ```
 
----
+回归脚本会复制一份临时扩展目录，启动独立的 Edge/Chromium 测试配置，不使用你的日常浏览器配置。
 
-## Philosophy | 理念
+当前覆盖：
 
-B站是一个很好的视频平台，但它的推荐系统被设计来最大化你的停留时间，而不是最大化你的收获。
+- 扩展能够加载
+- popup 总开关、模块开关、模式预设存在
+- 设置页能够打开并保存白名单
+- 模式预设能够切换，并能恢复默认专注模式
+- 推荐、动态、广告三组网络规则能独立启停
+- 视频页注入正常，播放器和基础视频信息可见
+- 操作栏和选集/合集可见
+- 视频元素的 `autoplay` 被关闭
+- 推荐、评论、弹幕等默认模块生效
+- 首页默认跳转到关注动态
+- 关闭首页重定向后首页不再跳转
+- 白名单中的页面不会被重定向，清空白名单后重定向恢复
 
-> "注意力经济"的商业模式是：产品越吸引用户注意力，越能让用户上瘾，就能从中获利。
+## 项目结构
 
-这个扩展不评价用户的选择，而是提供一个工具——让想摆脱推荐系统的人有一个简单的选择。
+```text
+manifest.json                 扩展配置
+background.js                 后台服务，负责重定向和 DNR 规则同步
+content.js                    页面脚本，负责注入样式、DOM 清理、SPA 路由处理
+content.css                   与 content.js 内置样式保持同步的 CSS 源文件
+rules_recommendations.json    推荐内容网络拦截规则
+rules_dynamic.json            动态页和热搜网络拦截规则
+rules_ads.json                广告推广网络拦截规则
+popup/                        扩展弹窗控制面板
+options/                      完整设置页
+scripts/                      自动化验证脚本
+icons/                        扩展图标
+```
 
-你只应该看你想看的内容。
+## 文档
 
----
+- [修改总结](./CHANGE_SUMMARY.md)
+- [隐私说明](./PRIVACY.md)
+- [故障排查](./TROUBLESHOOTING.md)
 
-## License | 许可证
+## 设计原则
+
+这个项目不替用户决定要看什么，而是把“主动选择观看”和“被推荐系统推着走”分开。
+
+播放器本身应该尽量正常；注意力干扰应该明确、可控、可关闭。
+
+## License
 
 MIT

@@ -31,33 +31,6 @@
     "priority": 1,
     "action": { "type": "block" },
     "condition": {
-      "urlFilter": "||api.bilibili.com/x/web-interface/dynamic/region",
-      "resourceTypes": ["xmlhttprequest"]
-    }
-  },
-  {
-    "id": 5,
-    "priority": 1,
-    "action": { "type": "block" },
-    "condition": {
-      "urlFilter": "||s.search.bilibili.com/main/hotword",
-      "resourceTypes": ["xmlhttprequest"]
-    }
-  },
-  {
-    "id": 6,
-    "priority": 1,
-    "action": { "type": "block" },
-    "condition": {
-      "urlFilter": "||cm.bilibili.com",
-      "resourceTypes": ["xmlhttprequest", "script", "image"]
-    }
-  },
-  {
-    "id": 7,
-    "priority": 1,
-    "action": { "type": "block" },
-    "condition": {
       "urlFilter": "||api.bilibili.com/x/web-interface/online/list",
       "resourceTypes": ["xmlhttprequest"]
     }

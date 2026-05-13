@@ -2,37 +2,126 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=300">
+  <meta name="viewport" content="width=340">
   <link rel="stylesheet" href="popup.css">
+  <title>Bilibili Less</title>
 </head>
 <body>
-  <div class="container">
-    <h1 class="logo">Bilibili <span class="highlight">Less</span></h1>
-    <p class="subtitle">抵制注意力工程</p>
-
-    <div class="status-bar">
-      <span class="status-dot" id="statusDot"></span>
-      <span id="statusText">运行中</span>
-    </div>
-
-    <label class="switch-row">
-      <span class="switch-label">启用扩展</span>
-      <input type="checkbox" id="enabled" checked>
-    </label>
-
-    <div class="stats" id="statsContainer">
-      <div class="stat-item">
-        <span class="stat-value">—</span>
-        <span class="stat-label">已拦截推荐</span>
+  <main class="panel">
+    <header class="header">
+      <div>
+        <h1>Bilibili Less</h1>
+        <p>保留主动观看，收起注意力干扰。</p>
       </div>
-      <div class="stat-item">
-        <span class="stat-value">—</span>
-        <span class="stat-label">已隐藏干扰</span>
-      </div>
-    </div>
+      <span class="status-dot" id="statusDot" aria-hidden="true"></span>
+    </header>
 
-    <p class="footer-note">你只应该看你想看的内容</p>
-  </div>
+    <section class="section">
+      <label class="switch-row primary">
+        <span>
+          <strong>启用扩展</strong>
+          <small id="statusText">正在保护浏览路径</small>
+        </span>
+        <input type="checkbox" id="enabled" checked>
+      </label>
+    </section>
+
+    <section class="section">
+      <h2>模式预设</h2>
+      <div class="preset-grid" role="group" aria-label="模式预设">
+        <button type="button" class="preset-button" id="preset-gentle" data-preset="gentle">
+          <strong>温和</strong>
+          <small>少量清理</small>
+        </button>
+        <button type="button" class="preset-button" id="preset-focus" data-preset="focus">
+          <strong>专注</strong>
+          <small>推荐方案</small>
+        </button>
+        <button type="button" class="preset-button" id="preset-strict" data-preset="strict">
+          <strong>严格</strong>
+          <small>最大限制</small>
+        </button>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>模块开关</h2>
+      <label class="switch-row">
+        <span>
+          <strong>动态页整理</strong>
+          <small>收起搜索、热搜、非视频动态和社交提示</small>
+        </span>
+        <input type="checkbox" id="module-dynamic" checked>
+      </label>
+
+      <label class="switch-row">
+        <span>
+          <strong>导航入口</strong>
+          <small>隐藏首页、直播、番剧等容易偏航的入口</small>
+        </span>
+        <input type="checkbox" id="module-navigation" checked>
+      </label>
+
+      <label class="switch-row">
+        <span>
+          <strong>推荐内容</strong>
+          <small>隐藏右侧推荐、相关视频和推荐接口</small>
+        </span>
+        <input type="checkbox" id="module-recommendations" checked>
+      </label>
+
+      <label class="switch-row">
+        <span>
+          <strong>评论区</strong>
+          <small>隐藏视频页评论区域</small>
+        </span>
+        <input type="checkbox" id="module-comments" checked>
+      </label>
+
+      <label class="switch-row">
+        <span>
+          <strong>弹幕功能</strong>
+          <small>隐藏弹幕层、弹幕开关、输入框和弹幕列表</small>
+        </span>
+        <input type="checkbox" id="module-danmaku" checked>
+      </label>
+
+      <label class="switch-row">
+        <span>
+          <strong>广告推广</strong>
+          <small>隐藏广告、活动、下载提示和推广组件</small>
+        </span>
+        <input type="checkbox" id="module-ads" checked>
+      </label>
+
+      <label class="switch-row">
+        <span>
+          <strong>结束推荐</strong>
+          <small>隐藏播放结束后的推荐覆盖层</small>
+        </span>
+        <input type="checkbox" id="module-ending" checked>
+      </label>
+
+      <label class="switch-row">
+        <span>
+          <strong>禁用自动连播</strong>
+          <small>视频自然结束后不自动播放下一个内容</small>
+        </span>
+        <input type="checkbox" id="module-autoplay" checked>
+      </label>
+
+      <label class="switch-row">
+        <span>
+          <strong>首页重定向</strong>
+          <small>访问首页或分区页时回到关注动态</small>
+        </span>
+        <input type="checkbox" id="module-redirect" checked>
+      </label>
+    </section>
+
+    <button type="button" class="options-link" id="open-options">打开完整设置</button>
+    <p class="note">网络拦截会随推荐、广告、动态整理等模块自动启用或停用。</p>
+  </main>
   <script src="popup.js"></script>
 </body>
 </html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="options.css">
+  <title>Bilibili Less 设置</title>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <h1>Bilibili Less 设置</h1>
+        <p>管理模式预设、模块开关和页面白名单。</p>
+      </div>
+      <span class="save-status" id="save-status">已同步</span>
+    </header>
+
+    <section class="section">
+      <div class="section-heading">
+        <h2>总开关</h2>
+        <p>暂停后，B 站会恢复原样。</p>
+      </div>
+      <label class="switch-row">
+        <span>
+          <strong>启用扩展</strong>
+          <small>控制所有页面清理、网络拦截和重定向</small>
+        </span>
+        <input type="checkbox" id="enabled" checked>
+      </label>
+    </section>
+
+    <section class="section">
+      <div class="section-heading">
+        <h2>模式预设</h2>
+        <p>先选择模式，再按需要微调模块。</p>
+      </div>
+      <div class="preset-grid" role="group" aria-label="模式预设">
+        <button type="button" class="preset-button" id="preset-gentle" data-preset="gentle">
+          <strong>温和</strong>
+          <small>保留评论、弹幕、导航和自动连播</small>
+        </button>
+        <button type="button" class="preset-button" id="preset-focus" data-preset="focus">
+          <strong>专注</strong>
+          <small>默认方案，隐藏主要注意力干扰</small>
+        </button>
+        <button type="button" class="preset-button" id="preset-strict" data-preset="strict">
+          <strong>严格</strong>
+          <small>后续更强限制项会归入这里</small>
+        </button>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-heading">
+        <h2>模块开关</h2>
+        <p>每项都会立即保存并同步到已打开的 B 站页面。</p>
+      </div>
+      <div class="module-grid">
+        <label class="switch-row">
+          <span><strong>动态页整理</strong><small>收起搜索、热搜、非视频动态和社交提示</small></span>
+          <input type="checkbox" id="module-dynamic" checked>
+        </label>
+        <label class="switch-row">
+          <span><strong>导航入口</strong><small>隐藏首页、直播、番剧等偏航入口</small></span>
+          <input type="checkbox" id="module-navigation" checked>
+        </label>
+        <label class="switch-row">
+          <span><strong>推荐内容</strong><small>隐藏右侧推荐、相关视频和推荐接口</small></span>
+          <input type="checkbox" id="module-recommendations" checked>
+        </label>
+        <label class="switch-row">
+          <span><strong>评论区</strong><small>隐藏视频页评论区域</small></span>
+          <input type="checkbox" id="module-comments" checked>
+        </label>
+        <label class="switch-row">
+          <span><strong>弹幕功能</strong><small>隐藏弹幕层、开关、输入框和列表</small></span>
+          <input type="checkbox" id="module-danmaku" checked>
+        </label>
+        <label class="switch-row">
+          <span><strong>广告推广</strong><small>隐藏广告、活动、下载提示和推广组件</small></span>
+          <input type="checkbox" id="module-ads" checked>
+        </label>
+        <label class="switch-row">
+          <span><strong>结束推荐</strong><small>隐藏播放结束后的推荐覆盖层</small></span>
+          <input type="checkbox" id="module-ending" checked>
+        </label>
+        <label class="switch-row">
+          <span><strong>禁用自动连播</strong><small>视频自然结束后不自动播放下一个内容</small></span>
+          <input type="checkbox" id="module-autoplay" checked>
+        </label>
+        <label class="switch-row">
+          <span><strong>首页重定向</strong><small>访问首页或分区页时回到关注动态</small></span>
+          <input type="checkbox" id="module-redirect" checked>
+        </label>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-heading">
+        <h2>页面白名单</h2>
+        <p>每行一个 B 站 URL 或通配符。匹配后该页面将完全放行。</p>
+      </div>
+      <textarea id="whitelist-allowed-urls" rows="7" spellcheck="false" placeholder="https://www.bilibili.com/
+https://www.bilibili.com/v/popular
+https://www.bilibili.com/video/BV*/"></textarea>
+      <div class="actions">
+        <button type="button" class="primary-button" id="save-whitelist">保存白名单</button>
+      </div>
+    </section>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

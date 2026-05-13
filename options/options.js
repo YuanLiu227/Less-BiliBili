@@ -1,4 +1,4 @@
-// Bilibili Less - Popup
+// Bilibili Less - Options page
 
 const DEFAULT_MODULES = {
   dynamic: true,
@@ -61,35 +61,38 @@ const MODULE_RULESETS = {
 
 const ALL_RULESETS = Object.values(MODULE_RULESETS).flat();
 
-function mergeSettings(settings = {}) {
+let settings = null;
+let statusTimer = null;
+
+function mergeSettings(value = {}) {
   return {
     ...DEFAULTS,
-    ...settings,
+    ...value,
     modules: {
       ...DEFAULT_MODULES,
-      ...(settings.modules || {})
+      ...(value.modules || {})
+    },
+    whitelist: {
+      ...DEFAULTS.whitelist,
+      ...(value.whitelist || {})
     }
   };
 }
 
-function getEnabledRulesets(settings) {
-  if (settings.enabled === false) return [];
+function getEnabledRulesets(value) {
+  if (value.enabled === false) return [];
   return Object.entries(MODULE_RULESETS)
-    .filter(([module]) => settings.modules[module] !== false)
+    .filter(([module]) => value.modules[module] !== false)
     .flatMap(([, rulesets]) => rulesets);
 }
 
-async function syncNetRules(settings) {
-  try {
-    const enableRulesetIds = getEnabledRulesets(settings);
-    const disableRulesetIds = ALL_RULESETS.filter(id => !enableRulesetIds.includes(id));
-    await chrome.declarativeNetRequest.updateEnabledRulesets({
-      enableRulesetIds,
-      disableRulesetIds
-    });
-  } catch (e) {
-    console.error('Failed to sync net rules:', e);
-  }
+async function syncNetRules(value) {
+  const enableRulesetIds = getEnabledRulesets(value);
+  const disableRulesetIds = ALL_RULESETS.filter(id => !enableRulesetIds.includes(id));
+  await chrome.declarativeNetRequest.updateEnabledRulesets({
+    enableRulesetIds,
+    disableRulesetIds
+  });
 }
 
 async function loadSettings() {
@@ -97,57 +100,66 @@ async function loadSettings() {
   return mergeSettings(result.settings || {});
 }
 
-function render(settings) {
-  document.getElementById('enabled').checked = settings.enabled !== false;
+function showStatus(text) {
+  const status = document.getElementById('save-status');
+  status.textContent = text;
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => {
+    status.textContent = '已同步';
+  }, 1400);
+}
+
+function render(value) {
+  document.getElementById('enabled').checked = value.enabled !== false;
   Object.entries(MODULE_INPUTS).forEach(([module, inputId]) => {
-    document.getElementById(inputId).checked = settings.modules[module] !== false;
+    document.getElementById(inputId).checked = value.modules[module] !== false;
   });
   document.querySelectorAll('.preset-button').forEach(button => {
-    button.classList.toggle('active', button.dataset.preset === settings.preset);
+    button.classList.toggle('active', button.dataset.preset === value.preset);
   });
-  updateStatus(settings.enabled !== false);
+  document.getElementById('whitelist-allowed-urls').value =
+    (value.whitelist.allowedUrls || []).join('\n');
 }
 
-function updateStatus(enabled) {
-  const dot = document.getElementById('statusDot');
-  const text = document.getElementById('statusText');
-  dot.className = 'status-dot' + (enabled ? '' : ' off');
-  text.textContent = enabled ? '正在保护浏览路径' : '已暂停，B 站恢复原样';
+async function save(nextSettings) {
+  settings = mergeSettings(nextSettings);
+  await chrome.storage.local.set({ settings });
+  await syncNetRules(settings);
+  render(settings);
+  showStatus('已保存');
 }
 
-async function saveSettings(settings) {
-  const merged = mergeSettings(settings);
-  await chrome.storage.local.set({ settings: merged });
-  await syncNetRules(merged);
-  render(merged);
+function readWhitelistTextarea() {
+  return document.getElementById('whitelist-allowed-urls')
+    .value
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  let settings = await loadSettings();
+  settings = await loadSettings();
   render(settings);
-  await syncNetRules(settings);
 
-  document.getElementById('enabled').addEventListener('change', async (event) => {
-    settings = mergeSettings({ ...settings, enabled: event.target.checked });
-    await saveSettings(settings);
+  document.getElementById('enabled').addEventListener('change', async event => {
+    await save({ ...settings, enabled: event.target.checked });
   });
 
   document.querySelectorAll('.preset-button').forEach(button => {
     button.addEventListener('click', async () => {
       const preset = button.dataset.preset;
-      settings = mergeSettings({
+      await save({
         ...settings,
         enabled: true,
         preset,
         modules: { ...PRESETS[preset] }
       });
-      await saveSettings(settings);
     });
   });
 
   Object.entries(MODULE_INPUTS).forEach(([module, inputId]) => {
-    document.getElementById(inputId).addEventListener('change', async (event) => {
-      settings = mergeSettings({
+    document.getElementById(inputId).addEventListener('change', async event => {
+      await save({
         ...settings,
         preset: 'custom',
         modules: {
@@ -155,11 +167,16 @@ document.addEventListener('DOMContentLoaded', async () => {
           [module]: event.target.checked
         }
       });
-      await saveSettings(settings);
     });
   });
 
-  document.getElementById('open-options').addEventListener('click', () => {
-    chrome.runtime.openOptionsPage();
+  document.getElementById('save-whitelist').addEventListener('click', async () => {
+    await save({
+      ...settings,
+      whitelist: {
+        ...settings.whitelist,
+        allowedUrls: readWhitelistTextarea()
+      }
+    });
   });
 });
