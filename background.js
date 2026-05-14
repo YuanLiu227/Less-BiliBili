@@ -3,6 +3,7 @@
 
 const DEFAULT_MODULES = {
   dynamic: true,
+  exploration: true,
   navigation: true,
   recommendations: true,
   comments: true,
@@ -23,6 +24,7 @@ const DEFAULT_SETTINGS = {
 
 const MODULE_RULESETS = {
   recommendations: ['ruleset_recommendations'],
+  exploration: ['ruleset_exploration'],
   dynamic: ['ruleset_dynamic'],
   ads: ['ruleset_ads']
 };

@@ -7,14 +7,5 @@
       "urlFilter": "||api.bilibili.com/x/web-interface/dynamic/region",
       "resourceTypes": ["xmlhttprequest"]
     }
-  },
-  {
-    "id": 2,
-    "priority": 1,
-    "action": { "type": "block" },
-    "condition": {
-      "urlFilter": "||s.search.bilibili.com/main/hotword",
-      "resourceTypes": ["xmlhttprequest"]
-    }
   }
 ]

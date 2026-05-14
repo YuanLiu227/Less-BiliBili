@@ -6,23 +6,6 @@ html.bilibili-less-video-page {
 }
 
 /* Dynamic page cleanup */
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-header__search,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .nav-search-box,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-header__bar .search-bar,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .search-panel,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .search-panel-popover,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .suggest-box,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .hot-search,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .trending,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .trending-entry,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-header__channel,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-header__bar .nav-container,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="search-bar"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="header-search"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="search-wrapper"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="hot-list"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="sidebar-hot"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="rank-list"],
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-actions,
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-card .ops,
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-comment,
@@ -34,8 +17,43 @@ html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item:
   display: none !important;
 }
 
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page input::placeholder,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page input::-webkit-input-placeholder {
+/* Search, hot topics, social spread, and other exploration paths */
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .bili-header__search,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .nav-search-box,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .bili-header__bar .search-bar,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .search-panel,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .search-panel-popover,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .suggest-box,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .hot-search,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .trending,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .trending-entry,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="search-bar"],
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="header-search"],
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="search-wrapper"],
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="hot-list"],
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="sidebar-hot"],
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="rank-list"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page a[href*="search.bilibili.com/all?keyword"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="video-tag"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="tag-panel"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="share-wrap"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="share-popover"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="video-share"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="bili-share"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="float-nav"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="elevator"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="backtop"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="customer"],
+html.bilibili-less-hide-exploration.bilibili-less-space-page a[href*="/relation/follow"],
+html.bilibili-less-hide-exploration.bilibili-less-space-page a[href*="/relation/fans"],
+html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watchlater"],
+html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watch-later"],
+html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="later-watch"] {
+  display: none !important;
+}
+
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page input::placeholder,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page input::-webkit-input-placeholder {
   color: transparent !important;
 }
 
@@ -59,11 +77,48 @@ html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="sub-nav"]
 html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="link-item"],
 html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="tab-link"],
 html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="tab-item"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__channel,
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .nav-container,
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .header-nav,
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .nav-link,
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-menu"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="nav-menu"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-link"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-item"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="menu-link"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="menu-item"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-link"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-item"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="top-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="top-tab"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="main-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="primary-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="sub-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="link-item"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="tab-link"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="tab-item"],
 html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__channel,
 html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar .nav-container,
 html.bilibili-less-hide-navigation.bilibili-less-video-page .header-nav,
 html.bilibili-less-hide-navigation.bilibili-less-video-page .nav-link,
 html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="header-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-menu"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="nav-menu"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-link"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-item"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="menu-link"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="menu-item"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="header-link"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="header-item"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="top-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="top-tab"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="main-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="primary-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="sub-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="link-item"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="tab-link"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="tab-item"],
 html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="nav-link"],
 html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="nav-item"] {
   display: none !important;
@@ -76,7 +131,11 @@ html.bilibili-less-hide-recommendations.bilibili-less-video-page .recommend-list
 html.bilibili-less-hide-recommendations.bilibili-less-video-page .rec-list,
 html.bilibili-less-hide-recommendations.bilibili-less-video-page .v-recommend-inline-player,
 html.bilibili-less-hide-recommendations.bilibili-less-video-page .video-card-ad-small,
-html.bilibili-less-hide-recommendations.bilibili-less-video-page .bpx-player-container [class*="related"] {
+html.bilibili-less-hide-recommendations.bilibili-less-video-page .bpx-player-container [class*="related"],
+html.bilibili-less-hide-recommendations.bilibili-less-space-page a[href*="/bangumi"],
+html.bilibili-less-hide-recommendations.bilibili-less-space-page [class*="bangumi"],
+html.bilibili-less-hide-recommendations.bilibili-less-space-page [class*="follow-season"],
+html.bilibili-less-hide-recommendations.bilibili-less-space-page [class*="subscription"] {
   display: none !important;
   pointer-events: none !important;
 }
@@ -86,7 +145,25 @@ html.bilibili-less-hide-comments.bilibili-less-video-page .reply-wrap,
 html.bilibili-less-hide-comments.bilibili-less-video-page .reply-container,
 html.bilibili-less-hide-comments.bilibili-less-video-page .comment-area,
 html.bilibili-less-hide-comments.bilibili-less-video-page .reply-area,
-html.bilibili-less-hide-comments.bilibili-less-video-page .root-reply-container {
+html.bilibili-less-hide-comments.bilibili-less-video-page .root-reply-container,
+html.bilibili-less-hide-comments.bilibili-less-video-page #comment,
+html.bilibili-less-hide-comments.bilibili-less-video-page #comments,
+html.bilibili-less-hide-comments.bilibili-less-video-page #bili-comments,
+html.bilibili-less-hide-comments.bilibili-less-video-page .bili-comments,
+html.bilibili-less-hide-comments.bilibili-less-video-page .comments-container,
+html.bilibili-less-hide-comments.bilibili-less-video-page .comment-container,
+html.bilibili-less-hide-comments.bilibili-less-video-page .comment-wrapper,
+html.bilibili-less-hide-comments.bilibili-less-video-page .comment-panel,
+html.bilibili-less-hide-comments.bilibili-less-video-page .comment-list,
+html.bilibili-less-hide-comments.bilibili-less-video-page .reply-list,
+html.bilibili-less-hide-comments.bilibili-less-video-page bili-comments,
+html.bilibili-less-hide-comments.bilibili-less-video-page bili-comment-renderer,
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="comments-container"],
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="comment-container"],
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="comment-wrapper"],
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="comment-panel"],
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="comment-list"],
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="reply-list"] {
   display: none !important;
 }
 
@@ -124,7 +201,14 @@ html.bilibili-less-hide-ads.bilibili-less-video-page [class*="notice-bar"],
 html.bilibili-less-hide-ads.bilibili-less-video-page [class*="announce"],
 html.bilibili-less-hide-ads.bilibili-less-video-page [class*="activity-entry"],
 html.bilibili-less-hide-ads.bilibili-less-video-page [class*="activity-panel"],
-html.bilibili-less-hide-ads.bilibili-less-video-page [class*="promote-entry"] {
+html.bilibili-less-hide-ads.bilibili-less-video-page [class*="promote-entry"],
+html.bilibili-less-hide-ads.bilibili-less-space-page a[href*="biligame.com"],
+html.bilibili-less-hide-ads.bilibili-less-space-page a[href*="live.bilibili.com"],
+html.bilibili-less-hide-ads.bilibili-less-space-page [class*="game-card"],
+html.bilibili-less-hide-ads.bilibili-less-space-page [class*="game-list"],
+html.bilibili-less-hide-ads.bilibili-less-space-page [class*="game-entry"],
+html.bilibili-less-hide-ads.bilibili-less-space-page [class*="live-room"],
+html.bilibili-less-hide-ads.bilibili-less-space-page [class*="live-card"] {
   display: none !important;
 }
 

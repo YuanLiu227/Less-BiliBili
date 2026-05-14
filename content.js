@@ -3,6 +3,7 @@
 
 const DEFAULT_MODULES = {
   dynamic: true,
+  exploration: true,
   navigation: true,
   recommendations: true,
   comments: true,
@@ -23,6 +24,7 @@ const DEFAULT_SETTINGS = {
 
 const MODULE_CLASS = {
   dynamic: 'bilibili-less-hide-dynamic',
+  exploration: 'bilibili-less-hide-exploration',
   navigation: 'bilibili-less-hide-navigation',
   recommendations: 'bilibili-less-hide-recommendations',
   comments: 'bilibili-less-hide-comments',
@@ -37,23 +39,6 @@ html.bilibili-less-video-page {
 }
 
 /* Dynamic page cleanup */
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-header__search,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .nav-search-box,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-header__bar .search-bar,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .search-panel,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .search-panel-popover,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .suggest-box,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .hot-search,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .trending,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .trending-entry,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-header__channel,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-header__bar .nav-container,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="search-bar"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="header-search"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="search-wrapper"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="hot-list"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="sidebar-hot"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page [class*="rank-list"],
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-actions,
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-card .ops,
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-comment,
@@ -65,8 +50,43 @@ html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item:
   display: none !important;
 }
 
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page input::placeholder,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page input::-webkit-input-placeholder {
+/* Search, hot topics, social spread, and other exploration paths */
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .bili-header__search,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .nav-search-box,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .bili-header__bar .search-bar,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .search-panel,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .search-panel-popover,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .suggest-box,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .hot-search,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .trending,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .trending-entry,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="search-bar"],
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="header-search"],
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="search-wrapper"],
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="hot-list"],
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="sidebar-hot"],
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="rank-list"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page a[href*="search.bilibili.com/all?keyword"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="video-tag"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="tag-panel"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="share-wrap"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="share-popover"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="video-share"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="bili-share"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="float-nav"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="elevator"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="backtop"],
+html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="customer"],
+html.bilibili-less-hide-exploration.bilibili-less-space-page a[href*="/relation/follow"],
+html.bilibili-less-hide-exploration.bilibili-less-space-page a[href*="/relation/fans"],
+html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watchlater"],
+html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watch-later"],
+html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="later-watch"] {
+  display: none !important;
+}
+
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page input::placeholder,
+html.bilibili-less-hide-exploration.bilibili-less-dynamic-page input::-webkit-input-placeholder {
   color: transparent !important;
 }
 
@@ -90,11 +110,48 @@ html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="sub-nav"]
 html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="link-item"],
 html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="tab-link"],
 html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="tab-item"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__channel,
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .nav-container,
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .header-nav,
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .nav-link,
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-menu"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="nav-menu"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-link"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-item"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="menu-link"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="menu-item"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-link"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-item"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="top-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="top-tab"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="main-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="primary-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="sub-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="link-item"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="tab-link"],
+html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="tab-item"],
 html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__channel,
 html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar .nav-container,
 html.bilibili-less-hide-navigation.bilibili-less-video-page .header-nav,
 html.bilibili-less-hide-navigation.bilibili-less-video-page .nav-link,
 html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="header-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-menu"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="nav-menu"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-link"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-item"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="menu-link"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="menu-item"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="header-link"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="header-item"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="top-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="top-tab"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="main-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="primary-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="sub-nav"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="link-item"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="tab-link"],
+html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="tab-item"],
 html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="nav-link"],
 html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="nav-item"] {
   display: none !important;
@@ -107,7 +164,11 @@ html.bilibili-less-hide-recommendations.bilibili-less-video-page .recommend-list
 html.bilibili-less-hide-recommendations.bilibili-less-video-page .rec-list,
 html.bilibili-less-hide-recommendations.bilibili-less-video-page .v-recommend-inline-player,
 html.bilibili-less-hide-recommendations.bilibili-less-video-page .video-card-ad-small,
-html.bilibili-less-hide-recommendations.bilibili-less-video-page .bpx-player-container [class*="related"] {
+html.bilibili-less-hide-recommendations.bilibili-less-video-page .bpx-player-container [class*="related"],
+html.bilibili-less-hide-recommendations.bilibili-less-space-page a[href*="/bangumi"],
+html.bilibili-less-hide-recommendations.bilibili-less-space-page [class*="bangumi"],
+html.bilibili-less-hide-recommendations.bilibili-less-space-page [class*="follow-season"],
+html.bilibili-less-hide-recommendations.bilibili-less-space-page [class*="subscription"] {
   display: none !important;
   pointer-events: none !important;
 }
@@ -117,7 +178,25 @@ html.bilibili-less-hide-comments.bilibili-less-video-page .reply-wrap,
 html.bilibili-less-hide-comments.bilibili-less-video-page .reply-container,
 html.bilibili-less-hide-comments.bilibili-less-video-page .comment-area,
 html.bilibili-less-hide-comments.bilibili-less-video-page .reply-area,
-html.bilibili-less-hide-comments.bilibili-less-video-page .root-reply-container {
+html.bilibili-less-hide-comments.bilibili-less-video-page .root-reply-container,
+html.bilibili-less-hide-comments.bilibili-less-video-page #comment,
+html.bilibili-less-hide-comments.bilibili-less-video-page #comments,
+html.bilibili-less-hide-comments.bilibili-less-video-page #bili-comments,
+html.bilibili-less-hide-comments.bilibili-less-video-page .bili-comments,
+html.bilibili-less-hide-comments.bilibili-less-video-page .comments-container,
+html.bilibili-less-hide-comments.bilibili-less-video-page .comment-container,
+html.bilibili-less-hide-comments.bilibili-less-video-page .comment-wrapper,
+html.bilibili-less-hide-comments.bilibili-less-video-page .comment-panel,
+html.bilibili-less-hide-comments.bilibili-less-video-page .comment-list,
+html.bilibili-less-hide-comments.bilibili-less-video-page .reply-list,
+html.bilibili-less-hide-comments.bilibili-less-video-page bili-comments,
+html.bilibili-less-hide-comments.bilibili-less-video-page bili-comment-renderer,
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="comments-container"],
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="comment-container"],
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="comment-wrapper"],
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="comment-panel"],
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="comment-list"],
+html.bilibili-less-hide-comments.bilibili-less-video-page [class*="reply-list"] {
   display: none !important;
 }
 
@@ -155,7 +234,14 @@ html.bilibili-less-hide-ads.bilibili-less-video-page [class*="notice-bar"],
 html.bilibili-less-hide-ads.bilibili-less-video-page [class*="announce"],
 html.bilibili-less-hide-ads.bilibili-less-video-page [class*="activity-entry"],
 html.bilibili-less-hide-ads.bilibili-less-video-page [class*="activity-panel"],
-html.bilibili-less-hide-ads.bilibili-less-video-page [class*="promote-entry"] {
+html.bilibili-less-hide-ads.bilibili-less-video-page [class*="promote-entry"],
+html.bilibili-less-hide-ads.bilibili-less-space-page a[href*="biligame.com"],
+html.bilibili-less-hide-ads.bilibili-less-space-page a[href*="live.bilibili.com"],
+html.bilibili-less-hide-ads.bilibili-less-space-page [class*="game-card"],
+html.bilibili-less-hide-ads.bilibili-less-space-page [class*="game-list"],
+html.bilibili-less-hide-ads.bilibili-less-space-page [class*="game-entry"],
+html.bilibili-less-hide-ads.bilibili-less-space-page [class*="live-room"],
+html.bilibili-less-hide-ads.bilibili-less-space-page [class*="live-card"] {
   display: none !important;
 }
 
@@ -183,26 +269,62 @@ html.bilibili-less-hide-dynamic .bili-header__bar .notice-num {
 
 const MODULE_SELECTORS = {
   dynamic: [
-    '.bili-header__search',
-    '.nav-search-box',
-    '.search-panel',
-    '.search-panel-popover',
-    '[class*="search-bar"]',
-    '[class*="header-search"]',
-    '[class*="search-wrapper"]',
-    '.hot-search',
-    '.trending',
-    '[class*="hot-list"]',
-    '[class*="hot-search"]',
-    '[class*="rank-list"]',
     '.bili-dyn-actions',
     '.bili-dyn-comment',
     '.bili-dyn-liked'
   ],
+  exploration: [
+    '.bilibili-less-dynamic-page .bili-header__search',
+    '.bilibili-less-dynamic-page .nav-search-box',
+    '.bilibili-less-dynamic-page .search-panel',
+    '.bilibili-less-dynamic-page .search-panel-popover',
+    '.bilibili-less-dynamic-page [class*="search-bar"]',
+    '.bilibili-less-dynamic-page [class*="header-search"]',
+    '.bilibili-less-dynamic-page [class*="search-wrapper"]',
+    '.bilibili-less-dynamic-page .hot-search',
+    '.bilibili-less-dynamic-page .trending',
+    '.bilibili-less-dynamic-page [class*="hot-list"]',
+    '.bilibili-less-dynamic-page [class*="hot-search"]',
+    '.bilibili-less-dynamic-page [class*="rank-list"]',
+    '.bilibili-less-video-page a[href*="search.bilibili.com/all?keyword"]',
+    '.bilibili-less-video-page [class*="video-tag"]',
+    '.bilibili-less-video-page [class*="tag-panel"]',
+    '.bilibili-less-video-page [class*="share-wrap"]',
+    '.bilibili-less-video-page [class*="share-popover"]',
+    '.bilibili-less-video-page [class*="video-share"]',
+    '.bilibili-less-video-page [class*="bili-share"]',
+    '.bilibili-less-video-page [class*="float-nav"]',
+    '.bilibili-less-video-page [class*="elevator"]',
+    '.bilibili-less-video-page [class*="backtop"]',
+    '.bilibili-less-video-page [class*="customer"]',
+    '.bilibili-less-space-page a[href*="/relation/follow"]',
+    '.bilibili-less-space-page a[href*="/relation/fans"]',
+    '.bilibili-less-space-page [class*="watchlater"]',
+    '.bilibili-less-space-page [class*="watch-later"]',
+    '.bilibili-less-space-page [class*="later-watch"]'
+  ],
   navigation: [
-    '[class*="header-nav"]',
-    '[class*="channel-menu"]',
-    '[class*="nav-menu"]'
+    '.bilibili-less-dynamic-page .bili-header__channel',
+    '.bilibili-less-dynamic-page .bili-header__bar .nav-container',
+    '.bilibili-less-dynamic-page [class*="header-nav"]',
+    '.bilibili-less-dynamic-page [class*="channel-menu"]',
+    '.bilibili-less-dynamic-page [class*="nav-menu"]',
+    '.bilibili-less-dynamic-page [class*="nav-link"]',
+    '.bilibili-less-dynamic-page [class*="nav-item"]',
+    '.bilibili-less-video-page .bili-header__channel',
+    '.bilibili-less-video-page .bili-header__bar .nav-container',
+    '.bilibili-less-video-page .bili-header__bar [class*="header-nav"]',
+    '.bilibili-less-video-page .bili-header__bar [class*="channel-menu"]',
+    '.bilibili-less-video-page .bili-header__bar [class*="nav-menu"]',
+    '.bilibili-less-video-page .bili-header__bar [class*="nav-link"]',
+    '.bilibili-less-video-page .bili-header__bar [class*="nav-item"]',
+    '.bilibili-less-space-page .bili-header__channel',
+    '.bilibili-less-space-page .bili-header__bar .nav-container',
+    '.bilibili-less-space-page .bili-header__bar [class*="header-nav"]',
+    '.bilibili-less-space-page .bili-header__bar [class*="channel-menu"]',
+    '.bilibili-less-space-page .bili-header__bar [class*="nav-menu"]',
+    '.bilibili-less-space-page .bili-header__bar [class*="nav-link"]',
+    '.bilibili-less-space-page .bili-header__bar [class*="nav-item"]'
   ],
   recommendations: [
     '.recommend-list',
@@ -211,14 +333,36 @@ const MODULE_SELECTORS = {
     '.rec-list',
     '.v-recommend-inline-player',
     '.video-card-ad-small',
-    'html.bilibili-less-video-page .bpx-player-container [class*="related"]'
+    'html.bilibili-less-video-page .bpx-player-container [class*="related"]',
+    '.bilibili-less-space-page a[href*="/bangumi"]',
+    '.bilibili-less-space-page [class*="bangumi"]',
+    '.bilibili-less-space-page [class*="follow-season"]',
+    '.bilibili-less-space-page [class*="subscription"]'
   ],
   comments: [
     '.reply-wrap',
     '.reply-container',
     '.comment-area',
     '.reply-area',
-    '.root-reply-container'
+    '.root-reply-container',
+    '#comment',
+    '#comments',
+    '#bili-comments',
+    '.bili-comments',
+    '.comments-container',
+    '.comment-container',
+    '.comment-wrapper',
+    '.comment-panel',
+    '.comment-list',
+    '.reply-list',
+    'bili-comments',
+    'bili-comment-renderer',
+    '[class*="comments-container"]',
+    '[class*="comment-container"]',
+    '[class*="comment-wrapper"]',
+    '[class*="comment-panel"]',
+    '[class*="comment-list"]',
+    '[class*="reply-list"]'
   ],
   danmaku: [
     '.bpx-player-danmaku',
@@ -252,7 +396,14 @@ const MODULE_SELECTORS = {
     '[class*="announce"]',
     '[class*="activity-entry"]',
     '[class*="activity-panel"]',
-    '[class*="promote-entry"]'
+    '[class*="promote-entry"]',
+    '.bilibili-less-space-page a[href*="biligame.com"]',
+    '.bilibili-less-space-page a[href*="live.bilibili.com"]',
+    '.bilibili-less-space-page [class*="game-card"]',
+    '.bilibili-less-space-page [class*="game-list"]',
+    '.bilibili-less-space-page [class*="game-entry"]',
+    '.bilibili-less-space-page [class*="live-room"]',
+    '.bilibili-less-space-page [class*="live-card"]'
   ],
   ending: [
     '.bpx-player-ending',
@@ -331,11 +482,12 @@ function updatePageClasses() {
   const hostname = window.location.hostname;
   const path = window.location.pathname;
 
-  html.classList.remove('bilibili-less-dynamic-page', 'bilibili-less-video-page');
+  html.classList.remove('bilibili-less-dynamic-page', 'bilibili-less-video-page', 'bilibili-less-space-page');
   if (hostname === 't.bilibili.com') html.classList.add('bilibili-less-dynamic-page');
   if (hostname === 'www.bilibili.com' && path.startsWith('/video/')) {
     html.classList.add('bilibili-less-video-page');
   }
+  if (hostname === 'space.bilibili.com') html.classList.add('bilibili-less-space-page');
 }
 
 function updateModuleClasses() {
@@ -389,18 +541,176 @@ function cleanup() {
   const path = window.location.pathname;
   const isDynamic = hostname === 't.bilibili.com';
   const isVideo = hostname === 'www.bilibili.com' && path.startsWith('/video/');
+  const isSpace = hostname === 'space.bilibili.com';
 
   updatePageClasses();
   updateModuleClasses();
-  if (!isDynamic && !isVideo) return;
+  if (!isDynamic && !isVideo && !isSpace) return;
 
   if (isDynamic) saveBgColor();
-  if (isDynamic && isModuleEnabled('navigation')) hideNavTextItems();
-  if (isDynamic && isModuleEnabled('navigation')) hideLogoDropdown();
-  if (isDynamic && isModuleEnabled('dynamic')) hideTooltips();
+  const shouldCleanNavigation = (isDynamic || isVideo || isSpace) && isModuleEnabled('navigation');
+  if (shouldCleanNavigation) hideNavTextItems();
+  if (shouldCleanNavigation) hideLogoDropdown();
+  if ((isDynamic || isVideo || isSpace) && isModuleEnabled('exploration')) hideTooltips();
 
   Object.keys(MODULE_SELECTORS).forEach(hideSelectorsForModule);
+  if (isVideo && isModuleEnabled('exploration')) hideVideoExplorationByContent();
+  if (isSpace) hideSpaceDistractionsByContent();
+  if (isVideo && isModuleEnabled('comments')) hideCommentSectionsByContent();
   updateAutoplayGuards(isVideo);
+}
+
+function getCommentSectionContainer(source) {
+  let current = source;
+  let best = null;
+
+  while (current && current !== document.body && current !== document.documentElement) {
+    try {
+      if (current.querySelector?.('.bpx-player-container, #bilibili-player, video, .video-info-container, .video-toolbar')) {
+        break;
+      }
+
+      const rect = current.getBoundingClientRect();
+      const style = getComputedStyle(current);
+      const isLayoutBox = rect.width >= 420 &&
+        rect.height >= 70 &&
+        style.display !== 'contents' &&
+        style.position !== 'fixed';
+
+      if (isLayoutBox) best = current;
+    } catch (e) {}
+    current = current.parentElement;
+  }
+
+  return best || source.closest?.('section, article, div') || source.parentElement;
+}
+
+function hideCommentSectionsByContent() {
+  const commentHints = ['评论', '最热', '最新', '回复', '唠会嗑'];
+
+  try {
+    document.querySelectorAll('input, textarea, [contenteditable="true"]').forEach(input => {
+      const text = [
+        input.getAttribute('placeholder'),
+        input.getAttribute('aria-label'),
+        input.getAttribute('title'),
+        input.textContent
+      ].filter(Boolean).join(' ');
+
+      if (commentHints.some(hint => text.includes(hint))) {
+        const target = getCommentSectionContainer(input);
+        if (target) hideElement(target);
+      }
+    });
+
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const text = node.textContent?.trim();
+        return text === '评论' ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+
+    let node;
+    while ((node = walker.nextNode())) {
+      const element = node.parentElement;
+      if (!element) continue;
+      const target = getCommentSectionContainer(element);
+      const sectionText = target?.textContent || '';
+      if (target && (sectionText.includes('最热') || sectionText.includes('最新') || sectionText.includes('回复'))) {
+        hideElement(target);
+      }
+    }
+  } catch (e) {}
+}
+
+function getSectionContainer(source) {
+  let current = source;
+  let best = null;
+
+  while (current && current !== document.body && current !== document.documentElement) {
+    try {
+      const rect = current.getBoundingClientRect();
+      const style = getComputedStyle(current);
+      const isLayoutBox = rect.width >= 180 &&
+        rect.height >= 32 &&
+        style.display !== 'contents' &&
+        style.position !== 'fixed';
+
+      if (isLayoutBox) best = current;
+      if (current.tagName === 'SECTION' || current.tagName === 'ASIDE' || current.tagName === 'ARTICLE') break;
+    } catch (e) {}
+    current = current.parentElement;
+  }
+
+  return best || source.closest?.('section, aside, article, div') || source.parentElement;
+}
+
+function hideClickableTextItems(root, texts) {
+  try {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const text = node.textContent?.trim();
+        return texts.includes(text) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+
+    let node;
+    while ((node = walker.nextNode())) {
+      const element = node.parentElement;
+      const target = element?.closest?.('a, button, li, [role="button"], [class*="item"], [class*="entry"]');
+      if (target) hideElement(target);
+    }
+  } catch (e) {}
+}
+
+function hideSectionsWithText(root, texts) {
+  try {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const text = node.textContent?.trim() || '';
+        return texts.some(item => text === item || text.includes(item))
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_REJECT;
+      }
+    });
+
+    let node;
+    while ((node = walker.nextNode())) {
+      const element = node.parentElement;
+      if (!element) continue;
+      const target = getSectionContainer(element);
+      if (target) hideElement(target);
+    }
+  } catch (e) {}
+}
+
+function hideVideoExplorationByContent() {
+  hideClickableTextItems(document.body, [
+    '动态',
+    '微信',
+    'QQ',
+    'QQ空间',
+    '微博',
+    '贴吧',
+    '嵌入代码',
+    '新版反馈',
+    '客服',
+    '顶部'
+  ]);
+}
+
+function hideSpaceDistractionsByContent() {
+  if (isModuleEnabled('exploration')) {
+    hideClickableTextItems(document.body, ['关注数', '粉丝数', '稍后再看']);
+  }
+
+  if (isModuleEnabled('recommendations')) {
+    hideSectionsWithText(document.body, ['订阅追番', '追番追剧']);
+  }
+
+  if (isModuleEnabled('ads')) {
+    hideSectionsWithText(document.body, ['最近玩过的游戏', '直播间', '前往TA的直播间']);
+  }
 }
 
 function updateAutoplayGuards(isVideo) {
@@ -422,6 +732,30 @@ function updateAutoplayGuards(isVideo) {
     video.addEventListener('ended', handler, true);
     autoplayHandlers.set(video, handler);
   });
+
+  disableAutoplayControlsByContent();
+}
+
+function disableAutoplayControlsByContent() {
+  hideClickableTextItems(document.body, ['自动连播', '自动开播', '下一个']);
+
+  try {
+    document.querySelectorAll(
+      '[class*="autoplay"], [class*="auto-play"], [class*="next-button"], [class*="next-btn"], [aria-label*="自动连播"], [aria-label*="下一个"]'
+    ).forEach(el => {
+      const text = [
+        el.textContent,
+        el.getAttribute('aria-label'),
+        el.getAttribute('title')
+      ].filter(Boolean).join(' ');
+
+      if (!/(自动连播|自动开播|下一个)/.test(text) && !/(autoplay|auto-play|next)/i.test(el.className || '')) return;
+
+      if ('checked' in el) el.checked = false;
+      if (el.getAttribute('aria-checked') === 'true') el.setAttribute('aria-checked', 'false');
+      hideElement(el);
+    });
+  } catch (e) {}
 }
 
 function detachAutoplayGuards() {
@@ -566,7 +900,7 @@ function setupSpaHandler() {
 function pauseExtension() {
   const html = document.documentElement;
   html.classList.add('bilibili-less-paused');
-  html.classList.remove('bilibili-less-dynamic-page', 'bilibili-less-video-page');
+  html.classList.remove('bilibili-less-dynamic-page', 'bilibili-less-video-page', 'bilibili-less-space-page');
   Object.values(MODULE_CLASS).forEach(className => html.classList.remove(className));
   removeCSS();
   restoreAll();
@@ -616,9 +950,7 @@ async function init() {
   resumeExtension();
 }
 
-if (window.location.hostname === 't.bilibili.com') {
-  document.documentElement.classList.add('bilibili-less-dynamic-page');
-}
+updatePageClasses();
 
 injectCSS();
 if (document.body) init();

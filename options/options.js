@@ -2,6 +2,7 @@
 
 const DEFAULT_MODULES = {
   dynamic: true,
+  exploration: true,
   navigation: true,
   recommendations: true,
   comments: true,
@@ -24,6 +25,7 @@ const DEFAULTS = {
 const PRESETS = {
   gentle: {
     dynamic: false,
+    exploration: false,
     navigation: false,
     recommendations: true,
     comments: false,
@@ -43,6 +45,7 @@ const PRESETS = {
 
 const MODULE_INPUTS = {
   dynamic: 'module-dynamic',
+  exploration: 'module-exploration',
   navigation: 'module-navigation',
   recommendations: 'module-recommendations',
   comments: 'module-comments',
@@ -55,6 +58,7 @@ const MODULE_INPUTS = {
 
 const MODULE_RULESETS = {
   recommendations: ['ruleset_recommendations'],
+  exploration: ['ruleset_exploration'],
   dynamic: ['ruleset_dynamic'],
   ads: ['ruleset_ads']
 };

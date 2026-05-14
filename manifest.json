@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bilibili Less",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "保留关注动态和正常播放体验，隐藏推荐、评论、弹幕、广告等注意力干扰。",
   "homepage_url": "https://github.com/YuanLiu227/Less-BiliBili",
 
@@ -30,6 +30,7 @@
     {
       "matches": [
         "*://t.bilibili.com/*",
+        "*://space.bilibili.com/*",
         "*://www.bilibili.com/*"
       ],
       "js": ["content.js"],
@@ -59,6 +60,11 @@
         "id": "ruleset_recommendations",
         "enabled": true,
         "path": "rules_recommendations.json"
+      },
+      {
+        "id": "ruleset_exploration",
+        "enabled": true,
+        "path": "rules_exploration.json"
       },
       {
         "id": "ruleset_dynamic",

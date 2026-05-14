@@ -11,6 +11,7 @@ const VIDEO_URL = process.env.BILIBILI_LESS_TEST_VIDEO || 'https://www.bilibili.
 
 const DEFAULT_MODULES = {
   dynamic: true,
+  exploration: true,
   navigation: true,
   recommendations: true,
   comments: true,
@@ -239,7 +240,7 @@ async function testPopup(extensionId) {
   await sleep(1000);
 
   const result = await page.eval(`(() => {
-    const ids = ['enabled', 'module-dynamic', 'module-navigation', 'module-recommendations', 'module-comments', 'module-danmaku', 'module-ads', 'module-ending', 'module-autoplay', 'module-redirect'];
+    const ids = ['enabled', 'module-dynamic', 'module-exploration', 'module-navigation', 'module-recommendations', 'module-comments', 'module-danmaku', 'module-ads', 'module-ending', 'module-autoplay', 'module-redirect'];
     const presets = ['preset-gentle', 'preset-focus', 'preset-strict'];
     return {
       title: document.querySelector('h1')?.textContent,
@@ -264,7 +265,7 @@ async function testOptionsPage(extensionId) {
   await sleep(1000);
 
   const result = await page.eval(`(() => {
-    const ids = ['enabled', 'module-dynamic', 'module-navigation', 'module-recommendations', 'module-comments', 'module-danmaku', 'module-ads', 'module-ending', 'module-autoplay', 'module-redirect'];
+    const ids = ['enabled', 'module-dynamic', 'module-exploration', 'module-navigation', 'module-recommendations', 'module-comments', 'module-danmaku', 'module-ads', 'module-ending', 'module-autoplay', 'module-redirect'];
     const presets = ['preset-gentle', 'preset-focus', 'preset-strict'];
     return {
       title: document.querySelector('h1')?.textContent,
@@ -314,6 +315,8 @@ async function testPresetSwitching(extensionId) {
       comments: document.getElementById('module-comments').checked,
       danmaku: document.getElementById('module-danmaku').checked,
       autoplay: document.getElementById('module-autoplay').checked,
+      exploration: document.getElementById('module-exploration').checked,
+      navigation: document.getElementById('module-navigation').checked,
       recommendations: document.getElementById('module-recommendations').checked,
       ads: document.getElementById('module-ads').checked
     };
@@ -323,13 +326,15 @@ async function testPresetSwitching(extensionId) {
   assert(gentle.comments === false, '温和模式保留评论区');
   assert(gentle.danmaku === false, '温和模式保留弹幕功能');
   assert(gentle.autoplay === false, '温和模式不强制禁用自动连播');
+  assert(gentle.exploration === false, '温和模式保留探索入口');
+  assert(gentle.navigation === false, '温和模式保留导航入口');
   assert(gentle.recommendations === true, '温和模式仍隐藏推荐内容');
   assert(gentle.ads === true, '温和模式仍隐藏广告推广');
 
   const focus = await page.eval(`(async () => {
     document.getElementById('preset-focus').click();
     await new Promise(resolve => setTimeout(resolve, 800));
-    const ids = ['enabled', 'module-dynamic', 'module-navigation', 'module-recommendations', 'module-comments', 'module-danmaku', 'module-ads', 'module-ending', 'module-autoplay', 'module-redirect'];
+    const ids = ['enabled', 'module-dynamic', 'module-exploration', 'module-navigation', 'module-recommendations', 'module-comments', 'module-danmaku', 'module-ads', 'module-ending', 'module-autoplay', 'module-redirect'];
     return {
       preset: document.querySelector('.preset-button.active')?.dataset.preset,
       allChecked: ids.every(id => document.getElementById(id).checked)
@@ -348,6 +353,7 @@ async function testRulesetSwitching(extensionId) {
 
   const initialRulesets = await page.eval('chrome.declarativeNetRequest.getEnabledRulesets()');
   assert(initialRulesets.includes('ruleset_recommendations'), '推荐网络规则默认启用');
+  assert(initialRulesets.includes('ruleset_exploration'), '探索入口网络规则默认启用');
   assert(initialRulesets.includes('ruleset_dynamic'), '动态网络规则默认启用');
   assert(initialRulesets.includes('ruleset_ads'), '广告网络规则默认启用');
 
@@ -360,11 +366,31 @@ async function testRulesetSwitching(extensionId) {
   })()`);
 
   assert(!afterToggle.includes('ruleset_recommendations'), '关闭推荐模块后推荐网络规则停用');
+  assert(afterToggle.includes('ruleset_exploration'), '关闭推荐模块不影响探索入口网络规则');
   assert(afterToggle.includes('ruleset_dynamic'), '关闭推荐模块不影响动态网络规则');
   assert(afterToggle.includes('ruleset_ads'), '关闭推荐模块不影响广告网络规则');
 
   await page.eval(`(async () => {
     const input = document.getElementById('module-recommendations');
+    input.checked = true;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    await new Promise(resolve => setTimeout(resolve, 800));
+    return true;
+  })()`);
+
+  const afterExplorationToggle = await page.eval(`(async () => {
+    const input = document.getElementById('module-exploration');
+    input.checked = false;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    await new Promise(resolve => setTimeout(resolve, 800));
+    return chrome.declarativeNetRequest.getEnabledRulesets();
+  })()`);
+
+  assert(!afterExplorationToggle.includes('ruleset_exploration'), '关闭探索入口模块后探索网络规则停用');
+  assert(afterExplorationToggle.includes('ruleset_recommendations'), '关闭探索入口模块不影响推荐网络规则');
+
+  await page.eval(`(async () => {
+    const input = document.getElementById('module-exploration');
     input.checked = true;
     input.dispatchEvent(new Event('change', { bubbles: true }));
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -417,7 +443,7 @@ async function testVideoPage() {
       videoAutoplayOff: [...document.querySelectorAll('video')].every(video => video.autoplay === false && !video.hasAttribute('autoplay')),
       recommendationHidden: [...document.querySelectorAll('.recommend-list, .recommend-list-v1, .recommend-list-v2, .rec-list')]
         .every(el => getComputedStyle(el).display === 'none'),
-      commentsHidden: [...document.querySelectorAll('.reply-wrap, .reply-container, .comment-area, .reply-area, .root-reply-container')]
+      commentsHidden: [...document.querySelectorAll('.reply-wrap, .reply-container, .comment-area, .reply-area, .root-reply-container, #comment, #comments, #bili-comments, .bili-comments, .comments-container, .comment-container, .comment-wrapper, .comment-panel, .comment-list, .reply-list, bili-comments, bili-comment-renderer, [class*="comments-container"], [class*="comment-container"], [class*="comment-wrapper"], [class*="comment-panel"], [class*="comment-list"], [class*="reply-list"]')]
         .every(el => getComputedStyle(el).display === 'none')
     };
   })()`);
@@ -440,6 +466,123 @@ async function testVideoPage() {
   log(`INFO 视频页地址: ${result.url}`);
   log(`INFO 操作栏可见: ${result.actionVisible}`);
   log(`INFO 选集/合集可见: ${result.episodeVisible}`);
+
+  const videoNavigationResult = await page.eval(`(async () => {
+    const fake = document.createElement('header');
+    fake.id = 'less-bilibili-video-navigation-test';
+    fake.className = 'less-test-header';
+    fake.style.cssText = 'display: block; width: 100%; min-height: 48px;';
+    fake.innerHTML = '<a href="https://www.bilibili.com">Bilibili</a><nav><a id="less-test-anime" href="/anime">番剧</a><a id="less-test-creator" href="/platform">创作中心</a></nav><button id="less-test-logo-extra"><span class="icon"></span></button>';
+    document.body.prepend(fake);
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const hidden = id => getComputedStyle(document.getElementById(id)).display === 'none';
+    return {
+      animeHidden: hidden('less-test-anime'),
+      creatorHidden: hidden('less-test-creator'),
+      logoExtraHidden: hidden('less-test-logo-extra')
+    };
+  })()`);
+  assert(videoNavigationResult.animeHidden, '视频页会隐藏与动态页一致的番剧导航入口');
+  assert(videoNavigationResult.creatorHidden, '视频页会隐藏与动态页一致的创作中心导航入口');
+  assert(videoNavigationResult.logoExtraHidden, '视频页会隐藏 Logo 旁的导航入口');
+
+  const videoExplorationResult = await page.eval(`(async () => {
+    const fake = document.createElement('section');
+    fake.id = 'less-bilibili-video-exploration-test';
+    fake.style.cssText = 'display: block; width: 760px; min-height: 120px;';
+    fake.innerHTML = [
+      '<a id="less-test-tag" href="https://search.bilibili.com/all?keyword=RISC-V">RISC-V</a>',
+      '<button id="less-test-share">微博</button>',
+      '<button id="less-test-autoplay" class="bpx-player-autoplay" aria-checked="true">自动连播</button>',
+      '<button id="less-test-next" class="bpx-player-next-button">下一个</button>'
+    ].join('');
+    document.body.appendChild(fake);
+    await new Promise(resolve => setTimeout(resolve, 700));
+    const hidden = id => getComputedStyle(document.getElementById(id)).display === 'none';
+    return {
+      tagHidden: hidden('less-test-tag'),
+      shareHidden: hidden('less-test-share'),
+      autoplayHidden: hidden('less-test-autoplay'),
+      nextHidden: hidden('less-test-next')
+    };
+  })()`);
+  assert(videoExplorationResult.tagHidden, '视频页会隐藏搜索标签入口');
+  assert(videoExplorationResult.shareHidden, '视频页会隐藏社交分享扩散入口');
+  assert(videoExplorationResult.autoplayHidden, '视频页会隐藏自动连播控件');
+  assert(videoExplorationResult.nextHidden, '视频页会隐藏下一个入口');
+
+  const modernCommentResult = await page.eval(`(async () => {
+    const fake = document.createElement('section');
+    fake.id = 'less-bilibili-modern-comment-test';
+    fake.style.cssText = 'width: 760px; min-height: 220px; padding: 16px;';
+    fake.innerHTML = '<div><span>评论</span><span>365</span><span>最热</span><span>最新</span></div><input placeholder="进来亲和UP唠会嗑呗"><div>测试评论内容</div>';
+    document.body.appendChild(fake);
+    await new Promise(resolve => setTimeout(resolve, 600));
+    return getComputedStyle(fake).display === 'none';
+  })()`);
+  assert(modernCommentResult, '新版评论区结构会被兜底隐藏');
+  page.close();
+}
+
+async function testSpacePage() {
+  const page = await newPage('https://space.bilibili.com/2');
+  await page.enablePage();
+  await sleep(8000);
+
+  const result = await page.eval(`(() => {
+    const html = document.documentElement;
+    return {
+      styleInjected: Boolean(document.getElementById('bilibili-less-style')),
+      isSpacePage: html.classList.contains('bilibili-less-space-page'),
+      classes: Array.from(html.classList).filter(name => name.startsWith('bilibili-less-hide-')),
+      bodyVisible: document.body ? getComputedStyle(document.body).visibility !== 'hidden' : false,
+      title: document.title
+    };
+  })()`);
+
+  assert(result.styleInjected, '个人空间已注入扩展样式');
+  assert(result.isSpacePage, '个人空间识别 class 生效');
+  assert(result.bodyVisible, '个人空间 body 未被整体隐藏');
+  assert(result.classes.includes('bilibili-less-hide-exploration'), '个人空间探索入口模块默认开启');
+  assert(result.classes.includes('bilibili-less-hide-recommendations'), '个人空间推荐模块默认开启');
+  assert(result.classes.includes('bilibili-less-hide-ads'), '个人空间广告推广模块默认开启');
+
+  const spaceCleanupResult = await page.eval(`(async () => {
+    const fake = document.createElement('main');
+    fake.id = 'less-bilibili-space-test';
+    fake.innerHTML = [
+      '<section id="less-space-profile"><h1>测试UP主</h1><a href="https://www.bilibili.com/video/BV1Q5411w7z5/">测试视频</a></section>',
+      '<a id="less-space-follow" href="https://space.bilibili.com/2/relation/follow">关注数422</a>',
+      '<a id="less-space-fans" href="https://space.bilibili.com/2/relation/fans">粉丝数139.4万</a>',
+      '<section id="less-space-bangumi"><h2>订阅追番</h2><a href="https://www.bilibili.com/bangumi/play/ss41620">番剧卡片</a></section>',
+      '<section id="less-space-game"><h2>最近玩过的游戏</h2><a href="https://www.biligame.com/detail/?id=1">游戏下载</a></section>',
+      '<section id="less-space-live"><h2>直播间</h2><a href="https://live.bilibili.com/1024">前往TA的直播间</a></section>'
+    ].join('');
+    document.body.appendChild(fake);
+    await new Promise(resolve => setTimeout(resolve, 700));
+    const visible = id => {
+      const el = document.getElementById(id);
+      if (!el) return false;
+      const style = getComputedStyle(el);
+      const rect = el.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+    };
+    return {
+      profileVisible: visible('less-space-profile'),
+      followHidden: !visible('less-space-follow'),
+      fansHidden: !visible('less-space-fans'),
+      bangumiHidden: !visible('less-space-bangumi'),
+      gameHidden: !visible('less-space-game'),
+      liveHidden: !visible('less-space-live')
+    };
+  })()`);
+
+  assert(spaceCleanupResult.profileVisible, '个人空间保留 UP 信息和视频入口');
+  assert(spaceCleanupResult.followHidden, '个人空间隐藏关注关系入口');
+  assert(spaceCleanupResult.fansHidden, '个人空间隐藏粉丝关系入口');
+  assert(spaceCleanupResult.bangumiHidden, '个人空间隐藏追番追剧区块');
+  assert(spaceCleanupResult.gameHidden, '个人空间隐藏游戏推广区块');
+  assert(spaceCleanupResult.liveHidden, '个人空间隐藏直播推广区块');
   page.close();
 }
 
@@ -530,6 +673,7 @@ async function main() {
     await testPresetSwitching(extensionId);
     await testRulesetSwitching(extensionId);
     await testVideoPage();
+    await testSpacePage();
     await testRedirect(extensionId);
     await testWhitelist(extensionId);
 
