@@ -108,6 +108,14 @@ function getEnabledRulesets(settings) {
     .flatMap(([, rulesets]) => rulesets);
 }
 
+function getRulesetSignature(settings) {
+  return getEnabledRulesets(settings).slice().sort().join('|');
+}
+
+function didNetworkRulesChange(previousSettings, nextSettings) {
+  return getRulesetSignature(previousSettings) !== getRulesetSignature(nextSettings);
+}
+
 async function syncNetRules() {
   try {
     const settings = await getSettings();
@@ -151,11 +159,25 @@ function canInjectContentScript(rawUrl) {
   }
 }
 
-async function applySettingsToTab(tab, settings) {
+function canReloadTab(rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+    return ['http:', 'https:'].includes(url.protocol) && url.hostname.endsWith('bilibili.com');
+  } catch (e) {
+    return false;
+  }
+}
+
+async function applySettingsToTab(tab, settings, options = {}) {
   if (!tab.id || !tab.url) return;
 
   if (shouldRedirectUrl(tab.url, settings)) {
     await chrome.tabs.update(tab.id, { url: 'https://t.bilibili.com' });
+    return;
+  }
+
+  if (options.reloadAfterApply && canReloadTab(tab.url)) {
+    await chrome.tabs.reload(tab.id);
     return;
   }
 
@@ -178,10 +200,10 @@ async function applySettingsToTab(tab, settings) {
   }
 }
 
-async function applySettingsToOpenTabs(settings) {
+async function applySettingsToOpenTabs(settings, options = {}) {
   try {
     const tabs = await chrome.tabs.query({ url: ['*://*.bilibili.com/*'] });
-    await Promise.all(tabs.map(tab => applySettingsToTab(tab, settings)));
+    await Promise.all(tabs.map(tab => applySettingsToTab(tab, settings, options)));
   } catch (e) {
     console.warn('Bilibili Less: failed to apply settings to open tabs', e);
   }
@@ -192,9 +214,15 @@ chrome.runtime.onInstalled.addListener(syncNetRules);
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local' || !changes.settings) return;
+  const previousSettings = mergeSettings(changes.settings.oldValue || {});
   const settings = mergeSettings(changes.settings.newValue || {});
-  syncNetRules();
-  applySettingsToOpenTabs(settings);
+
+  (async () => {
+    await syncNetRules();
+    await applySettingsToOpenTabs(settings, {
+      reloadAfterApply: didNetworkRulesChange(previousSettings, settings)
+    });
+  })();
 });
 
 chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {

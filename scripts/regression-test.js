@@ -228,6 +228,16 @@ async function waitForPageUrl(page, predicate, message, timeoutMs = 15000) {
   throw new Error(`${message}\nLast URL: ${lastUrl}`);
 }
 
+function testBackgroundAutoReloadSource() {
+  const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));
+  const background = fs.readFileSync(path.join(ROOT, 'background.js'), 'utf8');
+
+  assert(manifest.permissions.includes('tabs'), '扩展声明 tabs 权限用于同步已打开页面');
+  assert(manifest.permissions.includes('scripting'), '扩展声明 scripting 权限用于补注入内容脚本');
+  assert(background.includes('didNetworkRulesChange'), '后台会判断网络规则是否发生变化');
+  assert(background.includes('chrome.tabs.reload'), '网络规则变化后会自动刷新 B 站标签页');
+}
+
 function findExtensionId() {
   const securePreferences = path.join(PROFILE_DIR, 'Default', 'Secure Preferences');
   const preferences = path.join(PROFILE_DIR, 'Default', 'Preferences');
@@ -770,6 +780,7 @@ async function testWhitelist(extensionId) {
 async function main() {
   let browserProcess;
   try {
+    testBackgroundAutoReloadSource();
     prepareExtension();
     const browser = findBrowser();
     log(`INFO 使用浏览器: ${browser}`);
