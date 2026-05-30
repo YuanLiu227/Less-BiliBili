@@ -74,54 +74,23 @@ small {
   margin-bottom: 14px;
 }
 
-.preset-grid,
 .module-grid {
   display: grid;
   gap: 10px;
-}
-
-.preset-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .module-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.preset-button,
-.primary-button {
+.primary-button,
+.secondary-button {
   border: 1px solid #d9dee8;
   border-radius: 8px;
   background: #ffffff;
   color: #202124;
   cursor: pointer;
   font: inherit;
-}
-
-.preset-button {
-  min-height: 74px;
-  padding: 12px;
-  text-align: left;
-}
-
-.preset-button strong,
-.preset-button small {
-  display: block;
-}
-
-.preset-button strong {
-  font-size: 15px;
-}
-
-.preset-button small {
-  margin-top: 6px;
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.preset-button.active {
-  border-color: #00a1d6;
-  background: #e8f7fc;
 }
 
 .switch-row {
@@ -190,6 +159,7 @@ textarea {
   width: 100%;
   resize: vertical;
   min-height: 142px;
+  margin-top: 14px;
   padding: 12px;
   border: 1px solid #d9dee8;
   border-radius: 8px;
@@ -200,17 +170,26 @@ textarea {
 
 .actions {
   display: flex;
+  gap: 10px;
   justify-content: flex-end;
   margin-top: 12px;
 }
 
-.primary-button {
+.primary-button,
+.secondary-button {
   min-height: 38px;
   padding: 0 14px;
+  font-weight: 650;
+}
+
+.secondary-button {
+  color: #176b87;
+}
+
+.primary-button {
   border-color: #00a1d6;
   background: #00a1d6;
   color: #ffffff;
-  font-weight: 650;
 }
 
 button:focus-visible,
@@ -222,8 +201,7 @@ input:focus-visible {
 
 @media (max-width: 760px) {
   .hero,
-  .module-grid,
-  .preset-grid {
+  .module-grid {
     grid-template-columns: 1fr;
   }
 
@@ -234,5 +212,14 @@ input:focus-visible {
   .save-status {
     display: inline-block;
     margin-top: 12px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
   }
 }

@@ -14,7 +14,9 @@
   "permissions": [
     "storage",
     "declarativeNetRequest",
-    "webNavigation"
+    "webNavigation",
+    "tabs",
+    "scripting"
   ],
 
   "host_permissions": [
@@ -65,11 +67,6 @@
         "id": "ruleset_exploration",
         "enabled": true,
         "path": "rules_exploration.json"
-      },
-      {
-        "id": "ruleset_dynamic",
-        "enabled": true,
-        "path": "rules_dynamic.json"
       },
       {
         "id": "ruleset_ads",

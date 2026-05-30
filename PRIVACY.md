@@ -1,6 +1,6 @@
 # 隐私说明
 
-Less BiliBili 是一个本地运行的浏览器扩展。它在 B 站页面中隐藏干扰元素，并使用浏览器内置的 Manifest V3 `declarativeNetRequest` 能力拦截部分推荐、探索和广告接口。
+Less BiliBili 是一个本地运行的浏览器扩展。它在 B 站页面中隐藏干扰元素，并使用浏览器内置的 Manifest V3 `declarativeNetRequest` 能力拦截部分推荐、热榜分享和广告接口。
 
 扩展不会收集、上传或分析用户数据。
 
@@ -24,7 +24,6 @@ Less BiliBili 是一个本地运行的浏览器扩展。它在 B 站页面中隐
 扩展会使用浏览器本地扩展存储保存配置：
 
 - 总开关状态
-- 模式预设
 - 模块开关
 - 页面白名单
 
@@ -35,8 +34,10 @@ Less BiliBili 是一个本地运行的浏览器扩展。它在 B 站页面中隐
 | 权限 | 用途 |
 | --- | --- |
 | `storage` | 在本地保存扩展配置 |
-| `declarativeNetRequest` | 使用浏览器内置规则拦截推荐、探索、动态和广告接口 |
+| `declarativeNetRequest` | 使用浏览器内置规则拦截推荐、热榜分享和广告接口 |
 | `webNavigation` | 在首页重定向模块开启时，将非允许页面带回关注动态 |
+| `tabs` | 设置变化后查找已打开的 B 站标签页并同步当前开关 |
+| `scripting` | 对已打开但尚未注入脚本的 B 站页面补充注入内容脚本 |
 | `*://*.bilibili.com/*` | 在 B 站页面中注入脚本并隐藏干扰元素 |
 
 ## 网络拦截说明
@@ -48,8 +49,7 @@ Less BiliBili 是一个本地运行的浏览器扩展。它在 B 站页面中隐
 当前网络规则分为：
 
 - 推荐内容规则：`rules_recommendations.json`
-- 探索入口规则：`rules_exploration.json`
-- 动态页规则：`rules_dynamic.json`
+- 热榜和分享入口规则：`rules_exploration.json`
 - 广告推广规则：`rules_ads.json`
 
 这些规则会随对应模块开关启用或停用。

@@ -2,6 +2,7 @@
 
 const DEFAULT_MODULES = {
   dynamic: true,
+  search: true,
   exploration: true,
   navigation: true,
   recommendations: true,
@@ -15,36 +16,15 @@ const DEFAULT_MODULES = {
 
 const DEFAULTS = {
   enabled: true,
-  preset: 'focus',
   modules: { ...DEFAULT_MODULES },
   whitelist: {
     allowedUrls: []
   }
 };
 
-const PRESETS = {
-  gentle: {
-    dynamic: false,
-    exploration: false,
-    navigation: false,
-    recommendations: true,
-    comments: false,
-    danmaku: false,
-    ads: true,
-    ending: true,
-    autoplay: false,
-    redirect: false
-  },
-  focus: {
-    ...DEFAULT_MODULES
-  },
-  strict: {
-    ...DEFAULT_MODULES
-  }
-};
-
 const MODULE_INPUTS = {
   dynamic: 'module-dynamic',
+  search: 'module-search',
   exploration: 'module-exploration',
   navigation: 'module-navigation',
   recommendations: 'module-recommendations',
@@ -56,22 +36,34 @@ const MODULE_INPUTS = {
   redirect: 'module-redirect'
 };
 
+const POPUP_MODULE_INPUTS = {
+  search: 'module-search',
+  recommendations: 'module-recommendations',
+  comments: 'module-comments',
+  danmaku: 'module-danmaku',
+  autoplay: 'module-autoplay',
+  ads: 'module-ads',
+  redirect: 'module-redirect'
+};
+
 const MODULE_RULESETS = {
   recommendations: ['ruleset_recommendations'],
   exploration: ['ruleset_exploration'],
-  dynamic: ['ruleset_dynamic'],
   ads: ['ruleset_ads']
 };
 
 const ALL_RULESETS = Object.values(MODULE_RULESETS).flat();
 
 function mergeSettings(settings = {}) {
+  const normalized = { ...settings };
+  delete normalized.preset;
+
   return {
     ...DEFAULTS,
-    ...settings,
+    ...normalized,
     modules: {
       ...DEFAULT_MODULES,
-      ...(settings.modules || {})
+      ...(normalized.modules || {})
     }
   };
 }
@@ -103,11 +95,8 @@ async function loadSettings() {
 
 function render(settings) {
   document.getElementById('enabled').checked = settings.enabled !== false;
-  Object.entries(MODULE_INPUTS).forEach(([module, inputId]) => {
+  Object.entries(POPUP_MODULE_INPUTS).forEach(([module, inputId]) => {
     document.getElementById(inputId).checked = settings.modules[module] !== false;
-  });
-  document.querySelectorAll('.preset-button').forEach(button => {
-    button.classList.toggle('active', button.dataset.preset === settings.preset);
   });
   updateStatus(settings.enabled !== false);
 }
@@ -136,24 +125,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     await saveSettings(settings);
   });
 
-  document.querySelectorAll('.preset-button').forEach(button => {
-    button.addEventListener('click', async () => {
-      const preset = button.dataset.preset;
-      settings = mergeSettings({
-        ...settings,
-        enabled: true,
-        preset,
-        modules: { ...PRESETS[preset] }
-      });
-      await saveSettings(settings);
-    });
-  });
-
-  Object.entries(MODULE_INPUTS).forEach(([module, inputId]) => {
+  Object.entries(POPUP_MODULE_INPUTS).forEach(([module, inputId]) => {
     document.getElementById(inputId).addEventListener('change', async (event) => {
       settings = mergeSettings({
         ...settings,
-        preset: 'custom',
         modules: {
           ...settings.modules,
           [module]: event.target.checked

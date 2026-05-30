@@ -9,27 +9,32 @@ html.bilibili-less-video-page {
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-actions,
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-card .ops,
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-comment,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-liked,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item[data-type="2"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item[data-type="4"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item[data-type="8"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item:has([data-type="goods"]) {
+html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-liked {
   display: none !important;
 }
 
-/* Search, hot topics, social spread, and other exploration paths */
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .bili-header__search,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .nav-search-box,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .bili-header__bar .search-bar,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .search-panel,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .search-panel-popover,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .suggest-box,
+/* Search bar */
+html.bilibili-less-hide-search .bili-header__search,
+html.bilibili-less-hide-search .nav-search-box,
+html.bilibili-less-hide-search .bili-header__bar .search-bar,
+html.bilibili-less-hide-search .search-panel,
+html.bilibili-less-hide-search .search-panel-popover,
+html.bilibili-less-hide-search .suggest-box,
+html.bilibili-less-hide-search .bili-header__bar [class*="search-bar"],
+html.bilibili-less-hide-search .bili-header__bar [class*="header-search"],
+html.bilibili-less-hide-search .bili-header__bar [class*="search-wrapper"] {
+  display: none !important;
+}
+
+html.bilibili-less-hide-search .bili-header__bar input::placeholder,
+html.bilibili-less-hide-search .bili-header__bar input::-webkit-input-placeholder {
+  color: transparent !important;
+}
+
+/* Hot topics, social spread, and other exploration paths */
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .hot-search,
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .trending,
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .trending-entry,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="search-bar"],
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="header-search"],
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="search-wrapper"],
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="hot-list"],
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="sidebar-hot"],
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="rank-list"],
@@ -50,11 +55,6 @@ html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watchlater
 html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watch-later"],
 html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="later-watch"] {
   display: none !important;
-}
-
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page input::placeholder,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page input::-webkit-input-placeholder {
-  color: transparent !important;
 }
 
 /* Navigation entry cleanup */

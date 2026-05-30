@@ -3,6 +3,7 @@
 
 const DEFAULT_MODULES = {
   dynamic: true,
+  search: true,
   exploration: true,
   navigation: true,
   recommendations: true,
@@ -33,6 +34,8 @@ const MODULE_CLASS = {
   ending: 'bilibili-less-hide-ending'
 };
 
+const SEARCH_HIDDEN_CLASS = 'bilibili-less-hide-search';
+
 const EXTENSION_CSS = `
 html.bilibili-less-video-page {
   background-color: var(--bilibili-bg, #0d0d0d) !important;
@@ -42,27 +45,32 @@ html.bilibili-less-video-page {
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-actions,
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-card .ops,
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-comment,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-liked,
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item[data-type="2"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item[data-type="4"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item[data-type="8"],
-html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item:has([data-type="goods"]) {
+html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-liked {
   display: none !important;
 }
 
-/* Search, hot topics, social spread, and other exploration paths */
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .bili-header__search,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .nav-search-box,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .bili-header__bar .search-bar,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .search-panel,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .search-panel-popover,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .suggest-box,
+/* Search bar */
+html.bilibili-less-hide-search .bili-header__search,
+html.bilibili-less-hide-search .nav-search-box,
+html.bilibili-less-hide-search .bili-header__bar .search-bar,
+html.bilibili-less-hide-search .search-panel,
+html.bilibili-less-hide-search .search-panel-popover,
+html.bilibili-less-hide-search .suggest-box,
+html.bilibili-less-hide-search .bili-header__bar [class*="search-bar"],
+html.bilibili-less-hide-search .bili-header__bar [class*="header-search"],
+html.bilibili-less-hide-search .bili-header__bar [class*="search-wrapper"] {
+  display: none !important;
+}
+
+html.bilibili-less-hide-search .bili-header__bar input::placeholder,
+html.bilibili-less-hide-search .bili-header__bar input::-webkit-input-placeholder {
+  color: transparent !important;
+}
+
+/* Hot topics, social spread, and other exploration paths */
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .hot-search,
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .trending,
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page .trending-entry,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="search-bar"],
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="header-search"],
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="search-wrapper"],
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="hot-list"],
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="sidebar-hot"],
 html.bilibili-less-hide-exploration.bilibili-less-dynamic-page [class*="rank-list"],
@@ -83,11 +91,6 @@ html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watchlater
 html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watch-later"],
 html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="later-watch"] {
   display: none !important;
-}
-
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page input::placeholder,
-html.bilibili-less-hide-exploration.bilibili-less-dynamic-page input::-webkit-input-placeholder {
-  color: transparent !important;
 }
 
 /* Navigation entry cleanup */
@@ -268,19 +271,23 @@ html.bilibili-less-hide-dynamic .bili-header__bar .notice-num {
 `;
 
 const MODULE_SELECTORS = {
+  search: [
+    '.bili-header__search',
+    '.nav-search-box',
+    '.bili-header__bar .search-bar',
+    '.search-panel',
+    '.search-panel-popover',
+    '.suggest-box',
+    '.bili-header__bar [class*="search-bar"]',
+    '.bili-header__bar [class*="header-search"]',
+    '.bili-header__bar [class*="search-wrapper"]'
+  ],
   dynamic: [
     '.bili-dyn-actions',
     '.bili-dyn-comment',
     '.bili-dyn-liked'
   ],
   exploration: [
-    '.bilibili-less-dynamic-page .bili-header__search',
-    '.bilibili-less-dynamic-page .nav-search-box',
-    '.bilibili-less-dynamic-page .search-panel',
-    '.bilibili-less-dynamic-page .search-panel-popover',
-    '.bilibili-less-dynamic-page [class*="search-bar"]',
-    '.bilibili-less-dynamic-page [class*="header-search"]',
-    '.bilibili-less-dynamic-page [class*="search-wrapper"]',
     '.bilibili-less-dynamic-page .hot-search',
     '.bilibili-less-dynamic-page .trending',
     '.bilibili-less-dynamic-page [class*="hot-list"]',
@@ -425,16 +432,19 @@ let cleanInterval = null;
 const autoplayHandlers = new Map();
 
 function mergeSettings(settings = {}) {
+  const normalized = { ...settings };
+  delete normalized.preset;
+
   return {
     ...DEFAULT_SETTINGS,
-    ...settings,
+    ...normalized,
     modules: {
       ...DEFAULT_MODULES,
-      ...(settings.modules || {})
+      ...(normalized.modules || {})
     },
     whitelist: {
       ...DEFAULT_SETTINGS.whitelist,
-      ...(settings.whitelist || {})
+      ...(normalized.whitelist || {})
     }
   };
 }
@@ -495,6 +505,7 @@ function updateModuleClasses() {
   Object.entries(MODULE_CLASS).forEach(([module, className]) => {
     html.classList.toggle(className, isModuleEnabled(module));
   });
+  html.classList.toggle(SEARCH_HIDDEN_CLASS, currentSettings.enabled !== false && currentSettings.modules?.search === false);
 }
 
 function hideElement(el) {
@@ -522,7 +533,12 @@ function restoreAll() {
 }
 
 function hideSelectorsForModule(module) {
-  if (!isModuleEnabled(module)) return;
+  if (module === 'search') {
+    if (currentSettings.enabled === false || currentSettings.modules?.search !== false) return;
+  } else if (!isModuleEnabled(module)) {
+    return;
+  }
+
   (MODULE_SELECTORS[module] || []).forEach(selector => {
     try {
       document.querySelectorAll(selector).forEach(hideElement);
@@ -898,11 +914,30 @@ function setupSpaHandler() {
   window.addEventListener('popstate', checkUrlChange);
 }
 
+function applySettings(nextSettings) {
+  currentSettings = mergeSettings(nextSettings || {});
+  restoreAll();
+
+  if (currentSettings.enabled === false || isCurrentUrlWhitelisted()) {
+    pauseExtension();
+    return;
+  }
+
+  if (!isAllowedPage()) {
+    window.location.href = 'https://t.bilibili.com';
+    return;
+  }
+
+  resumeExtension();
+  cleanup();
+}
+
 function pauseExtension() {
   const html = document.documentElement;
   html.classList.add('bilibili-less-paused');
   html.classList.remove('bilibili-less-dynamic-page', 'bilibili-less-video-page', 'bilibili-less-space-page');
   Object.values(MODULE_CLASS).forEach(className => html.classList.remove(className));
+  html.classList.remove(SEARCH_HIDDEN_CLASS);
   removeCSS();
   restoreAll();
   detachAutoplayGuards();
@@ -924,13 +959,13 @@ function resumeExtension() {
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local' || !changes.settings) return;
-  currentSettings = mergeSettings(changes.settings.newValue || {});
-  restoreAll();
-  if (currentSettings.enabled === false || isCurrentUrlWhitelisted()) {
-    pauseExtension();
-  } else {
-    resumeExtension();
-  }
+  applySettings(changes.settings.newValue || {});
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type !== 'BILIBILI_LESS_APPLY_SETTINGS') return;
+  applySettings(message.settings || {});
+  sendResponse({ ok: true });
 });
 
 async function init() {
@@ -945,6 +980,11 @@ async function init() {
 
   if (currentSettings.enabled === false || isCurrentUrlWhitelisted()) {
     pauseExtension();
+    return;
+  }
+
+  if (!isAllowedPage()) {
+    window.location.href = 'https://t.bilibili.com';
     return;
   }
 

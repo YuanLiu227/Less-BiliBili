@@ -3,6 +3,7 @@
 
 const DEFAULT_MODULES = {
   dynamic: true,
+  search: true,
   exploration: true,
   navigation: true,
   recommendations: true,
@@ -25,7 +26,6 @@ const DEFAULT_SETTINGS = {
 const MODULE_RULESETS = {
   recommendations: ['ruleset_recommendations'],
   exploration: ['ruleset_exploration'],
-  dynamic: ['ruleset_dynamic'],
   ads: ['ruleset_ads']
 };
 
@@ -45,17 +45,30 @@ const ALLOWED_PATH_RULES = [
   { host: 'www.bilibili.com', prefix: '/account/history' }
 ];
 
+const SEARCH_HOSTS = new Set([
+  'search.bilibili.com'
+]);
+
+const CONTENT_SCRIPT_HOSTS = new Set([
+  't.bilibili.com',
+  'space.bilibili.com',
+  'www.bilibili.com'
+]);
+
 function mergeSettings(settings = {}) {
+  const normalized = { ...settings };
+  delete normalized.preset;
+
   return {
     ...DEFAULT_SETTINGS,
-    ...settings,
+    ...normalized,
     modules: {
       ...DEFAULT_MODULES,
-      ...(settings.modules || {})
+      ...(normalized.modules || {})
     },
     whitelist: {
       ...DEFAULT_SETTINGS.whitelist,
-      ...(settings.whitelist || {})
+      ...(normalized.whitelist || {})
     }
   };
 }
@@ -109,12 +122,79 @@ async function syncNetRules() {
   }
 }
 
+function shouldRedirectUrl(rawUrl, settings) {
+  if (!isModuleEnabled(settings, 'redirect')) return false;
+  if (isUrlWhitelisted(rawUrl, settings)) return false;
+
+  let url;
+  try {
+    url = new URL(rawUrl);
+  } catch (e) {
+    return false;
+  }
+
+  if (!url.hostname.endsWith('bilibili.com')) return false;
+  if (ALLOWED_FULL_HOSTS.has(url.hostname)) return false;
+  if (SEARCH_HOSTS.has(url.hostname) && isModuleEnabled(settings, 'search')) return false;
+
+  return !ALLOWED_PATH_RULES.some(rule =>
+    url.hostname === rule.host && url.pathname.startsWith(rule.prefix)
+  );
+}
+
+function canInjectContentScript(rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+    return CONTENT_SCRIPT_HOSTS.has(url.hostname);
+  } catch (e) {
+    return false;
+  }
+}
+
+async function applySettingsToTab(tab, settings) {
+  if (!tab.id || !tab.url) return;
+
+  if (shouldRedirectUrl(tab.url, settings)) {
+    await chrome.tabs.update(tab.id, { url: 'https://t.bilibili.com' });
+    return;
+  }
+
+  if (!canInjectContentScript(tab.url)) return;
+
+  try {
+    await chrome.tabs.sendMessage(tab.id, {
+      type: 'BILIBILI_LESS_APPLY_SETTINGS',
+      settings
+    });
+  } catch (e) {
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['content.js']
+      });
+    } catch (injectError) {
+      console.warn('Bilibili Less: failed to inject content script', injectError);
+    }
+  }
+}
+
+async function applySettingsToOpenTabs(settings) {
+  try {
+    const tabs = await chrome.tabs.query({ url: ['*://*.bilibili.com/*'] });
+    await Promise.all(tabs.map(tab => applySettingsToTab(tab, settings)));
+  } catch (e) {
+    console.warn('Bilibili Less: failed to apply settings to open tabs', e);
+  }
+}
+
 chrome.runtime.onStartup.addListener(syncNetRules);
 chrome.runtime.onInstalled.addListener(syncNetRules);
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local' || !changes.settings) return;
+  const settings = mergeSettings(changes.settings.newValue || {});
   syncNetRules();
+  applySettingsToOpenTabs(settings);
 });
 
 chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
@@ -127,19 +207,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     settings = mergeSettings();
   }
 
-  if (!isModuleEnabled(settings, 'redirect')) return;
-  if (isUrlWhitelisted(details.url, settings)) return;
-
-  const url = new URL(details.url);
-  if (!url.hostname.endsWith('bilibili.com')) return;
-
-  if (ALLOWED_FULL_HOSTS.has(url.hostname)) return;
-
-  for (const rule of ALLOWED_PATH_RULES) {
-    if (url.hostname === rule.host && url.pathname.startsWith(rule.prefix)) {
-      return;
-    }
+  if (shouldRedirectUrl(details.url, settings)) {
+    chrome.tabs.update(details.tabId, { url: 'https://t.bilibili.com' });
   }
-
-  chrome.tabs.update(details.tabId, { url: 'https://t.bilibili.com' });
 });

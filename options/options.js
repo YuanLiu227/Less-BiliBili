@@ -2,6 +2,7 @@
 
 const DEFAULT_MODULES = {
   dynamic: true,
+  search: true,
   exploration: true,
   navigation: true,
   recommendations: true,
@@ -15,36 +16,15 @@ const DEFAULT_MODULES = {
 
 const DEFAULTS = {
   enabled: true,
-  preset: 'focus',
   modules: { ...DEFAULT_MODULES },
   whitelist: {
     allowedUrls: []
   }
 };
 
-const PRESETS = {
-  gentle: {
-    dynamic: false,
-    exploration: false,
-    navigation: false,
-    recommendations: true,
-    comments: false,
-    danmaku: false,
-    ads: true,
-    ending: true,
-    autoplay: false,
-    redirect: false
-  },
-  focus: {
-    ...DEFAULT_MODULES
-  },
-  strict: {
-    ...DEFAULT_MODULES
-  }
-};
-
 const MODULE_INPUTS = {
   dynamic: 'module-dynamic',
+  search: 'module-search',
   exploration: 'module-exploration',
   navigation: 'module-navigation',
   recommendations: 'module-recommendations',
@@ -59,7 +39,6 @@ const MODULE_INPUTS = {
 const MODULE_RULESETS = {
   recommendations: ['ruleset_recommendations'],
   exploration: ['ruleset_exploration'],
-  dynamic: ['ruleset_dynamic'],
   ads: ['ruleset_ads']
 };
 
@@ -69,16 +48,19 @@ let settings = null;
 let statusTimer = null;
 
 function mergeSettings(value = {}) {
+  const normalized = { ...value };
+  delete normalized.preset;
+
   return {
     ...DEFAULTS,
-    ...value,
+    ...normalized,
     modules: {
       ...DEFAULT_MODULES,
-      ...(value.modules || {})
+      ...(normalized.modules || {})
     },
     whitelist: {
       ...DEFAULTS.whitelist,
-      ...(value.whitelist || {})
+      ...(normalized.whitelist || {})
     }
   };
 }
@@ -118,9 +100,6 @@ function render(value) {
   Object.entries(MODULE_INPUTS).forEach(([module, inputId]) => {
     document.getElementById(inputId).checked = value.modules[module] !== false;
   });
-  document.querySelectorAll('.preset-button').forEach(button => {
-    button.classList.toggle('active', button.dataset.preset === value.preset);
-  });
   document.getElementById('whitelist-allowed-urls').value =
     (value.whitelist.allowedUrls || []).join('\n');
 }
@@ -149,23 +128,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     await save({ ...settings, enabled: event.target.checked });
   });
 
-  document.querySelectorAll('.preset-button').forEach(button => {
-    button.addEventListener('click', async () => {
-      const preset = button.dataset.preset;
-      await save({
-        ...settings,
-        enabled: true,
-        preset,
-        modules: { ...PRESETS[preset] }
-      });
-    });
-  });
-
   Object.entries(MODULE_INPUTS).forEach(([module, inputId]) => {
     document.getElementById(inputId).addEventListener('change', async event => {
       await save({
         ...settings,
-        preset: 'custom',
         modules: {
           ...settings.modules,
           [module]: event.target.checked
@@ -181,6 +147,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         ...settings.whitelist,
         allowedUrls: readWhitelistTextarea()
       }
+    });
+  });
+
+  document.getElementById('reset-modules').addEventListener('click', async () => {
+    await save({
+      ...settings,
+      enabled: true,
+      modules: { ...DEFAULT_MODULES }
     });
   });
 });

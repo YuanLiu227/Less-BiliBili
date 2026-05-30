@@ -27,60 +27,26 @@
     </section>
 
     <section class="section">
-      <h2>模式预设</h2>
-      <div class="preset-grid" role="group" aria-label="模式预设">
-        <button type="button" class="preset-button" id="preset-gentle" data-preset="gentle">
-          <strong>温和</strong>
-          <small>少量清理</small>
-        </button>
-        <button type="button" class="preset-button" id="preset-focus" data-preset="focus">
-          <strong>专注</strong>
-          <small>推荐方案</small>
-        </button>
-        <button type="button" class="preset-button" id="preset-strict" data-preset="strict">
-          <strong>严格</strong>
-          <small>最大限制</small>
-        </button>
-      </div>
-    </section>
-
-    <section class="section">
-      <h2>模块开关</h2>
+      <h2>快速开关</h2>
       <label class="switch-row">
         <span>
-          <strong>动态页整理</strong>
-          <small>收起非视频动态、动态评论和社交动作</small>
+          <strong>开启搜索功能</strong>
+          <small>显示搜索栏并允许进入搜索结果页</small>
         </span>
-        <input type="checkbox" id="module-dynamic" checked>
+        <input type="checkbox" id="module-search" checked>
       </label>
 
       <label class="switch-row">
         <span>
-          <strong>探索入口</strong>
-          <small>隐藏搜索热词、视频标签、分享扩散和关系跳转</small>
-        </span>
-        <input type="checkbox" id="module-exploration" checked>
-      </label>
-
-      <label class="switch-row">
-        <span>
-          <strong>导航入口</strong>
-          <small>隐藏首页、直播、番剧等容易偏航的入口</small>
-        </span>
-        <input type="checkbox" id="module-navigation" checked>
-      </label>
-
-      <label class="switch-row">
-        <span>
-          <strong>推荐内容</strong>
-          <small>隐藏右侧推荐、相关视频和推荐接口</small>
+          <strong>隐藏右侧推荐</strong>
+          <small>隐藏视频页右侧推荐、相关视频和部分推荐接口</small>
         </span>
         <input type="checkbox" id="module-recommendations" checked>
       </label>
 
       <label class="switch-row">
         <span>
-          <strong>评论区</strong>
+          <strong>隐藏评论区</strong>
           <small>隐藏视频页评论区域</small>
         </span>
         <input type="checkbox" id="module-comments" checked>
@@ -88,26 +54,10 @@
 
       <label class="switch-row">
         <span>
-          <strong>弹幕功能</strong>
+          <strong>隐藏弹幕</strong>
           <small>隐藏弹幕层、弹幕开关、输入框和弹幕列表</small>
         </span>
         <input type="checkbox" id="module-danmaku" checked>
-      </label>
-
-      <label class="switch-row">
-        <span>
-          <strong>广告推广</strong>
-          <small>隐藏广告、活动、下载提示和推广组件</small>
-        </span>
-        <input type="checkbox" id="module-ads" checked>
-      </label>
-
-      <label class="switch-row">
-        <span>
-          <strong>结束推荐</strong>
-          <small>隐藏播放结束后的推荐覆盖层</small>
-        </span>
-        <input type="checkbox" id="module-ending" checked>
       </label>
 
       <label class="switch-row">
@@ -120,15 +70,23 @@
 
       <label class="switch-row">
         <span>
-          <strong>首页重定向</strong>
-          <small>访问首页或分区页时回到关注动态</small>
+          <strong>隐藏广告和推广</strong>
+          <small>隐藏广告、活动、下载提示、直播和游戏推广</small>
+        </span>
+        <input type="checkbox" id="module-ads" checked>
+      </label>
+
+      <label class="switch-row">
+        <span>
+          <strong>首页跳到关注动态</strong>
+          <small>访问首页或分区页时自动跳转到关注动态</small>
         </span>
         <input type="checkbox" id="module-redirect" checked>
       </label>
     </section>
 
     <button type="button" class="options-link" id="open-options">打开完整设置</button>
-    <p class="note">网络拦截会随推荐、广告、动态整理等模块自动启用或停用。</p>
+    <p class="note">更多动态页、导航和播放结束推荐设置，可在完整设置中调整。</p>
   </main>
   <script src="popup.js"></script>
 </body>
