@@ -865,6 +865,7 @@ function isAllowedPage() {
   const path = window.location.pathname;
   if (hostname === 'www.bilibili.com') {
     return path.startsWith('/video/') ||
+           path.startsWith('/space/') ||
            path.startsWith('/history') ||
            path.startsWith('/account/history');
   }

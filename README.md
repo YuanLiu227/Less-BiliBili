@@ -12,7 +12,8 @@ Less BiliBili 是一个 Manifest V3 浏览器扩展，目标是把 B 站从“�
 | --- | --- |
 | 关注动态 | 查看已关注 UP 的动态更新 |
 | 视频详情页 | 播放器、标题、UP 信息、视频数据、简介、操作栏、选集/合集、宽屏、小窗 |
-| 个人空间 | UP 信息、主页/投稿/合集、视频列表 |
+| 个人空间 | `space.bilibili.com` 与 `www.bilibili.com/space/*` 下的 UP 信息、主页/投稿/合集、视频列表 |
+| 关注列表 / 账号中心 | `account.bilibili.com` 下管理关注，并进入已关注 UP 主主页 |
 | 历史记录 | `www.bilibili.com/history`、`www.bilibili.com/account/history` |
 | 登录相关 | `passport.bilibili.com` |
 
@@ -118,6 +119,7 @@ node scripts/regression-test.js
 - 首页默认跳转到关注动态
 - 关闭首页重定向后首页不再跳转
 - 白名单中的页面不会被重定向，清空白名单后重定向恢复
+- 关注列表和两种个人空间地址可以正常访问
 
 ## 项目结构
 
@@ -133,7 +135,7 @@ rules_ads.json                广告推广网络拦截规则
 popup/                        扩展弹窗控制面板
 options/                      完整设置页
 scripts/                      自动化验证脚本
-icons/                        扩展图标
+icons/                        扩展图标，包含浅蓝电视图标和橙色减号标识
 ```
 
 ## 文档

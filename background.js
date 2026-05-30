@@ -34,11 +34,13 @@ const ALL_RULESETS = Object.values(MODULE_RULESETS).flat();
 const ALLOWED_FULL_HOSTS = new Set([
   't.bilibili.com',
   'passport.bilibili.com',
-  'space.bilibili.com'
+  'space.bilibili.com',
+  'account.bilibili.com',
 ]);
 
 const ALLOWED_PATH_RULES = [
   { host: 'www.bilibili.com', prefix: '/video/' },
+  { host: 'www.bilibili.com', prefix: '/space/' },
   { host: 'www.bilibili.com', prefix: '/history' },
   { host: 'www.bilibili.com', prefix: '/account/history' }
 ];
