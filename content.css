@@ -1,10 +1,3 @@
-/* Bilibili Less - Static CSS source.
-   content.js injects the same rules dynamically so the extension can pause cleanly. */
-
-html.bilibili-less-video-page {
-  background-color: var(--bilibili-bg, #0d0d0d) !important;
-}
-
 /* Dynamic page cleanup */
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-actions,
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-card .ops,
@@ -49,78 +42,35 @@ html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="float-nav"
 html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="elevator"],
 html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="backtop"],
 html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="customer"],
-html.bilibili-less-hide-exploration.bilibili-less-space-page a[href*="/relation/follow"],
-html.bilibili-less-hide-exploration.bilibili-less-space-page a[href*="/relation/fans"],
-html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watchlater"],
-html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watch-later"],
-html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="later-watch"] {
+html.bilibili-less-hide-exploration.bilibili-less-space-page a[href*="/relation/fans"] {
   display: none !important;
 }
 
-/* Navigation entry cleanup */
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="header-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="channel-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="nav-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="nav-link"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="nav-item"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="channel-link"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="channel-item"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="menu-link"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="menu-item"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="header-link"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="header-item"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="top-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="top-tab"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="main-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="primary-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="sub-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="link-item"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="tab-link"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="tab-item"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__channel,
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .nav-container,
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .header-nav,
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .nav-link,
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="nav-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-link"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-item"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="menu-link"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="menu-item"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-link"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-item"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="top-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="top-tab"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="main-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="primary-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="sub-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="link-item"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="tab-link"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="tab-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__channel,
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar .nav-container,
-html.bilibili-less-hide-navigation.bilibili-less-video-page .header-nav,
-html.bilibili-less-hide-navigation.bilibili-less-video-page .nav-link,
-html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="header-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="nav-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-link"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="menu-link"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="menu-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="header-link"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="header-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="top-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="top-tab"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="main-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="primary-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="sub-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="link-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="tab-link"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="tab-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="nav-link"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="nav-item"] {
+/* Hide channel menus; preserve search, following, history and account controls. */
+html.bilibili-less-hide-navigation .bili-header__channel,
+html.bilibili-less-hide-navigation .bili-header__bar .channel-menu {
+  display: none !important;
+}
+
+/* Suggestions are not a search request. Keep actual query results and filters. */
+html.bilibili-less-hide-exploration .bili-header__bar .search-panel,
+html.bilibili-less-hide-exploration .bili-header__bar .search-panel-popover,
+html.bilibili-less-hide-exploration .bili-header__bar .suggest-box,
+html.bilibili-less-hide-exploration .nav-search-box .search-panel,
+html.bilibili-less-hide-exploration .nav-search-box .suggestion,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .trending,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .hot-search,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .search-recommend,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .suggestion,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .search-suggest,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .suggest-wrap,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .search-header .search-panel,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .search-header .search-panel-popover,
+html.bilibili-less-hide-recommendations.bilibili-less-dynamic-page .bili-dyn-up-recommend,
+html.bilibili-less-hide-recommendations.bilibili-less-dynamic-page .bili-dyn-recommend,
+html.bilibili-less-hide-recommendations.bilibili-less-dynamic-page .bili-dyn-topic:not(.bili-dyn-list__item .bili-dyn-topic),
+html.bilibili-less-hide-recommendations.bilibili-less-dynamic-page .bili-dyn-live-users,
+html.bilibili-less-hide-recommendations.bilibili-less-dynamic-page .bili-dyn-sidebar__recommend {
   display: none !important;
 }
 

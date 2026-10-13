@@ -1,144 +1,36 @@
-// Bilibili Less - Popup
-
-const DEFAULT_MODULES = {
-  dynamic: true,
-  search: true,
-  exploration: true,
-  navigation: true,
-  recommendations: true,
-  comments: true,
-  danmaku: true,
-  ads: true,
-  ending: true,
-  autoplay: true,
-  redirect: true
-};
-
-const DEFAULTS = {
-  enabled: true,
-  modules: { ...DEFAULT_MODULES },
-  whitelist: {
-    allowedUrls: []
-  }
-};
-
-const MODULE_INPUTS = {
-  dynamic: 'module-dynamic',
-  search: 'module-search',
-  exploration: 'module-exploration',
-  navigation: 'module-navigation',
-  recommendations: 'module-recommendations',
-  comments: 'module-comments',
-  danmaku: 'module-danmaku',
-  ads: 'module-ads',
-  ending: 'module-ending',
-  autoplay: 'module-autoplay',
-  redirect: 'module-redirect'
-};
-
-const POPUP_MODULE_INPUTS = {
-  search: 'module-search',
-  recommendations: 'module-recommendations',
-  comments: 'module-comments',
-  danmaku: 'module-danmaku',
-  autoplay: 'module-autoplay',
-  ads: 'module-ads',
-  redirect: 'module-redirect'
-};
-
-const MODULE_RULESETS = {
-  recommendations: ['ruleset_recommendations'],
-  exploration: ['ruleset_exploration'],
-  ads: ['ruleset_ads']
-};
-
-const ALL_RULESETS = Object.values(MODULE_RULESETS).flat();
-
-function mergeSettings(settings = {}) {
-  const normalized = { ...settings };
-  delete normalized.preset;
-
-  return {
-    ...DEFAULTS,
-    ...normalized,
-    modules: {
-      ...DEFAULT_MODULES,
-      ...(normalized.modules || {})
-    }
-  };
-}
-
-function getEnabledRulesets(settings) {
-  if (settings.enabled === false) return [];
-  return Object.entries(MODULE_RULESETS)
-    .filter(([module]) => settings.modules[module] !== false)
-    .flatMap(([, rulesets]) => rulesets);
-}
-
-async function syncNetRules(settings) {
-  try {
-    const enableRulesetIds = getEnabledRulesets(settings);
-    const disableRulesetIds = ALL_RULESETS.filter(id => !enableRulesetIds.includes(id));
-    await chrome.declarativeNetRequest.updateEnabledRulesets({
-      enableRulesetIds,
-      disableRulesetIds
-    });
-  } catch (e) {
-    console.error('Failed to sync net rules:', e);
-  }
-}
-
-async function loadSettings() {
-  const result = await chrome.storage.local.get('settings');
-  return mergeSettings(result.settings || {});
-}
-
-function render(settings) {
-  document.getElementById('enabled').checked = settings.enabled !== false;
-  Object.entries(POPUP_MODULE_INPUTS).forEach(([module, inputId]) => {
-    document.getElementById(inputId).checked = settings.modules[module] !== false;
-  });
-  updateStatus(settings.enabled !== false);
-}
-
-function updateStatus(enabled) {
-  const dot = document.getElementById('statusDot');
-  const text = document.getElementById('statusText');
-  dot.className = 'status-dot' + (enabled ? '' : ' off');
-  text.textContent = enabled ? '正在保护浏览路径' : '已暂停，B 站恢复原样';
-}
-
-async function saveSettings(settings) {
-  const merged = mergeSettings(settings);
-  await chrome.storage.local.set({ settings: merged });
-  await syncNetRules(merged);
-  render(merged);
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
-  let settings = await loadSettings();
-  render(settings);
-  await syncNetRules(settings);
-
-  document.getElementById('enabled').addEventListener('change', async (event) => {
-    settings = mergeSettings({ ...settings, enabled: event.target.checked });
-    await saveSettings(settings);
+  const searchInput = document.getElementById('search-keyword');
+  await createSettingsUI({
+    render(settings) {
+      const enabled = settings.enabled;
+      document.getElementById('statusText').textContent = !enabled ? '已暂停，页面恢复原样'
+        : Object.values(settings.modules).every(Boolean) ? '已开启 · 默认设置' : '已开启 · 自定义设置';
+      const canSearch = !enabled || settings.modules.search;
+      searchInput.disabled = !canSearch;
+      document.getElementById('search-submit').disabled = !canSearch;
+      document.getElementById('search-note').textContent = canSearch
+        ? '输入关键词，直接进入搜索结果。' : '搜索已关闭，可在更多设置中开启。';
+      const protections = [
+        ['recommendations', '推荐'], ['exploration', '热搜'], ['autoplay', '自动连播']
+      ].filter(([module]) => settings.modules[module]).map(([, label]) => label);
+      document.getElementById('protection-summary').textContent = !enabled ? '开启后，继续按你的设置减少干扰。'
+        : protections.length ? `已收起${protections.join('、')}。` : '推荐、热搜和自动连播均已放开。';
+    },
+    status(text, error = false) {
+      const el = document.getElementById('save-status');
+      el.textContent = text;
+      el.classList.toggle('error', error);
+    }
   });
-
-  Object.entries(POPUP_MODULE_INPUTS).forEach(([module, inputId]) => {
-    document.getElementById(inputId).addEventListener('change', async (event) => {
-      settings = mergeSettings({
-        ...settings,
-        modules: {
-          ...settings.modules,
-          [module]: event.target.checked
-        }
-      });
-      await saveSettings(settings);
-    });
+  document.getElementById('search-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const keyword = searchInput.value.trim();
+    if (!keyword) { searchInput.setCustomValidity('请先输入你想看的内容。'); searchInput.reportValidity(); return; }
+    try {
+      await chrome.tabs.create({ url: `https://search.bilibili.com/all?keyword=${encodeURIComponent(keyword)}` });
+      window.close();
+    } catch { document.getElementById('search-note').textContent = '未能打开搜索，请重试。'; }
   });
-
-  document.getElementById('open-options').addEventListener('click', () => {
-    chrome.runtime.openOptionsPage();
-  });
+  searchInput.addEventListener('input', () => searchInput.setCustomValidity(''));
+  document.getElementById('open-options').addEventListener('click', () => chrome.runtime.openOptionsPage());
 });

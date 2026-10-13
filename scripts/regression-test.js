@@ -2,11 +2,14 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { spawn } = require('child_process');
+const fixtureFor = require('./fixtures');
+const LIVE = process.argv.includes('--live');
 
 const ROOT = path.resolve(__dirname, '..');
 const PORT = Number(process.env.BILIBILI_LESS_TEST_PORT || 9231);
-const EXT_DIR = path.join(os.tmpdir(), 'LessBiliBiliRegressionExt');
-const PROFILE_DIR = path.join(os.tmpdir(), 'LessBiliBiliRegressionProfile');
+const TEST_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'LessBiliBiliRegression-'));
+const EXT_DIR = path.join(TEST_DIR, 'extension');
+const PROFILE_DIR = path.join(TEST_DIR, 'profile');
 const VIDEO_URL = process.env.BILIBILI_LESS_TEST_VIDEO || 'https://www.bilibili.com/video/BV1Q5411w7z5/';
 
 const DEFAULT_MODULES = {
@@ -41,12 +44,12 @@ function assertWithDetails(condition, message, details) {
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, LIVE ? ms : Math.min(ms, 500)));
 }
 
 function cleanupDir(dir) {
   const resolved = path.resolve(dir);
-  if (!resolved.startsWith(path.resolve(os.tmpdir()))) {
+  if (resolved !== TEST_DIR && !resolved.startsWith(TEST_DIR + path.sep)) {
     throw new Error(`Refuse to clean a non-temp path: ${resolved}`);
   }
   fs.rmSync(resolved, { recursive: true, force: true });
@@ -77,7 +80,7 @@ function prepareExtension() {
       const relative = path.relative(ROOT, source);
       if (!relative) return true;
       const first = relative.split(path.sep)[0];
-      return !['.git', 'node_modules'].includes(first);
+      return !['.git', 'node_modules', '_metadata', 'test-artifacts'].includes(first);
     }
   });
 }
@@ -91,6 +94,7 @@ function launchBrowser(browser) {
     '--disable-first-run-ui',
     '--no-first-run',
     '--no-default-browser-check',
+    '--force-device-scale-factor=1',
     '--disable-popup-blocking',
     '--window-size=1280,900',
     '--window-position=-32000,-32000',
@@ -118,12 +122,25 @@ async function waitForDebugEndpoint() {
 }
 
 async function newPage(url) {
-  const response = await fetch(`http://127.0.0.1:${PORT}/json/new?${encodeURIComponent(url)}`, {
+  const response = await fetch(`http://127.0.0.1:${PORT}/json/new?about:blank`, {
     method: 'PUT'
   });
   if (!response.ok) throw new Error(`无法创建测试页面: ${response.status}`);
   const target = await response.json();
-  return new CDP(target.webSocketDebuggerUrl, target.id);
+  const page = new CDP(target.webSocketDebuggerUrl, target.id);
+  await page.enablePage();
+  if (!LIVE) {
+    page.on('Fetch.requestPaused', params => {
+      page.send('Fetch.fulfillRequest', {
+        requestId: params.requestId, responseCode: 200,
+        responseHeaders: [{ name: 'Content-Type', value: 'text/html; charset=utf-8' }],
+        body: Buffer.from(fixtureFor(params.request.url)).toString('base64')
+      }).catch(error => log(`WARN fixture: ${error.message}`));
+    });
+    await page.send('Fetch.enable', { patterns: [{ urlPattern: '*://*.bilibili.com/*', resourceType: 'Document' }] });
+  }
+  if (url !== 'about:blank') await page.navigate(url, 1000);
+  return page;
 }
 
 class CDP {
@@ -228,14 +245,20 @@ async function waitForPageUrl(page, predicate, message, timeoutMs = 15000) {
   throw new Error(`${message}\nLast URL: ${lastUrl}`);
 }
 
-function testBackgroundAutoReloadSource() {
+function testManifest() {
   const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));
-  const background = fs.readFileSync(path.join(ROOT, 'background.js'), 'utf8');
 
   assert(manifest.permissions.includes('tabs'), '扩展声明 tabs 权限用于同步已打开页面');
   assert(manifest.permissions.includes('scripting'), '扩展声明 scripting 权限用于补注入内容脚本');
-  assert(background.includes('didNetworkRulesChange'), '后台会判断网络规则是否发生变化');
-  assert(background.includes('chrome.tabs.reload'), '网络规则变化后会自动刷新 B 站标签页');
+  assert(manifest.content_scripts[0].matches.includes('*://search.bilibili.com/*'), '搜索结果页也会加载清理脚本');
+}
+
+async function screenshot(page, name, clip) {
+  clip ||= await page.eval('({ x: 0, y: 0, width: innerWidth, height: document.documentElement.scrollHeight, scale: 1 })');
+  const result = await page.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip });
+  const output = path.join(ROOT, 'test-artifacts', name + '.png');
+  fs.mkdirSync(path.dirname(output), { recursive: true });
+  fs.writeFileSync(output, Buffer.from(result.data, 'base64'));
 }
 
 function findExtensionId() {
@@ -273,7 +296,7 @@ async function testPopup(extensionId) {
   await sleep(1000);
 
   const result = await page.eval(`(() => {
-    const ids = ['enabled', 'module-search', 'module-recommendations', 'module-comments', 'module-danmaku', 'module-autoplay', 'module-ads', 'module-redirect'];
+    const ids = ['enabled', 'module-comments', 'module-danmaku'];
     const advancedIds = ['module-dynamic', 'module-exploration', 'module-navigation', 'module-ending'];
     const presets = ['preset-gentle', 'preset-focus', 'preset-strict'];
     return {
@@ -281,7 +304,11 @@ async function testPopup(extensionId) {
       missing: ids.filter(id => !document.getElementById(id)),
       presentAdvanced: advancedIds.filter(id => document.getElementById(id)),
       presentPresets: presets.filter(id => document.getElementById(id)),
-      hasSearchLabel: document.body.textContent.includes('开启搜索功能'),
+      hasSearch: Boolean(document.getElementById('search-keyword')),
+      hasFeed: Boolean(document.querySelector('a[href="https://t.bilibili.com/"]')),
+      hasHistory: Boolean(document.querySelector('.history-link')),
+      switchCount: document.querySelectorAll('input[type="checkbox"]').length,
+      height: document.body.scrollHeight,
       checked: Object.fromEntries(ids.map(id => [id, document.getElementById(id)?.checked]))
     };
   })()`);
@@ -290,8 +317,10 @@ async function testPopup(extensionId) {
   assert(result.missing.length === 0, 'popup 总开关和快速开关都存在');
   assert(result.presentAdvanced.length === 0, 'popup 不展示高级和场景化模块开关');
   assert(result.presentPresets.length === 0, 'popup 不再展示模式预设按钮');
-  assert(result.hasSearchLabel, 'popup 使用“开启搜索功能”文案');
+  assert(result.hasSearch && result.hasFeed && result.hasHistory, 'popup 直接提供关注、搜索和历史入口');
+  assert(result.switchCount === 3 && result.height < 600, 'popup 只保留三个开关且无需长列表滚动');
   assert(Object.values(result.checked).every(Boolean), 'popup 默认开关均为开启状态');
+  await screenshot(page, 'popup', { x: 0, y: 0, width: 350, height: result.height, scale: 1 });
   page.close();
 }
 
@@ -308,7 +337,7 @@ async function testOptionsPage(extensionId) {
       missing: ids.filter(id => !document.getElementById(id)),
       presentPresets: presets.filter(id => document.getElementById(id)),
       headings: Array.from(document.querySelectorAll('h2')).map(el => el.textContent.trim()),
-      hasSearchLabel: document.body.textContent.includes('开启搜索功能'),
+      hasSearchLabel: document.body.textContent.includes('允许主动搜索'),
       hasWhitelist: Boolean(document.getElementById('whitelist-allowed-urls')),
       hasSave: Boolean(document.getElementById('save-whitelist')),
       hasReset: Boolean(document.getElementById('reset-modules'))
@@ -318,11 +347,17 @@ async function testOptionsPage(extensionId) {
   assert(result.title === 'Bilibili Less 设置', '设置页标题正确');
   assert(result.missing.length === 0, '设置页模块开关都存在');
   assert(result.presentPresets.length === 0, '设置页不再展示模式预设按钮');
-  assert(['基础控制', '视频页', '关注动态', '推广和白名单'].every(title => result.headings.includes(title)), '设置页按场景分组展示模块');
-  assert(result.hasSearchLabel, '设置页使用“开启搜索功能”文案');
+  assert(['关注与搜索', '观看体验'].every(title => result.headings.includes(title)), '设置页按使用目标分组');
+  assert(result.hasSearchLabel, '设置页保留主动搜索选项');
   assert(result.hasWhitelist, '设置页白名单输入区存在');
   assert(result.hasSave, '设置页白名单保存按钮存在');
   assert(result.hasReset, '设置页恢复默认模块按钮存在');
+  await screenshot(page, 'options-desktop');
+  await page.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
+  const mobileLayout = await page.eval('({ width: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth })');
+  assertWithDetails(mobileLayout.scrollWidth <= mobileLayout.width, '窄屏设置页没有横向溢出', mobileLayout);
+  await screenshot(page, 'options-mobile');
+  await page.send('Emulation.clearDeviceMetricsOverride');
 
   const storageResult = await page.eval(`(async () => {
     const textarea = document.getElementById('whitelist-allowed-urls');
@@ -366,7 +401,7 @@ async function testOptionsPage(extensionId) {
 }
 
 async function testRulesetSwitching(extensionId) {
-  const page = await newPage(`chrome-extension://${extensionId}/popup/popup.html`);
+  const page = await newPage(`chrome-extension://${extensionId}/options/options.html`);
   await page.enablePage();
   await sleep(1000);
 
@@ -555,7 +590,7 @@ async function testVideoPage(extensionId) {
   assert(videoExplorationResult.tagHidden, '视频页会隐藏搜索标签入口');
   assert(videoExplorationResult.shareHidden, '视频页会隐藏社交分享扩散入口');
   assert(videoExplorationResult.autoplayHidden, '视频页会隐藏自动连播控件');
-  assert(videoExplorationResult.nextHidden, '视频页会隐藏下一个入口');
+  assert(!videoExplorationResult.nextHidden, '视频页保留手动切换下一条入口');
 
   const modernCommentResult = await page.eval(`(async () => {
     const fake = document.createElement('section');
@@ -658,7 +693,7 @@ async function testSpacePage() {
   })()`);
 
   assert(spaceCleanupResult.profileVisible, '个人空间保留 UP 信息和视频入口');
-  assert(spaceCleanupResult.followHidden, '个人空间隐藏关注关系入口');
+  assert(!spaceCleanupResult.followHidden, '个人空间保留关注管理入口');
   assert(spaceCleanupResult.fansHidden, '个人空间隐藏粉丝关系入口');
   assert(spaceCleanupResult.bangumiHidden, '个人空间隐藏追番追剧区块');
   assert(spaceCleanupResult.gameHidden, '个人空间隐藏游戏推广区块');
@@ -673,7 +708,7 @@ async function testRedirect(extensionId) {
   const redirectedUrl = await waitForPageUrl(page, url => url.startsWith('https://t.bilibili.com'), 'Home page did not redirect to dynamic feed');
   assert(redirectedUrl.startsWith('https://t.bilibili.com'), '首页默认跳转到关注动态');
 
-  const popup = await newPage(`chrome-extension://${extensionId}/popup/popup.html`);
+  const popup = await newPage(`chrome-extension://${extensionId}/options/options.html`);
   await popup.enablePage();
   await sleep(1000);
   await popup.eval(`(async () => {
@@ -689,7 +724,7 @@ async function testRedirect(extensionId) {
   const nonRedirectedUrl = await waitForPageUrl(page, url => url.startsWith('https://www.bilibili.com'), 'Home page did not stay on www.bilibili.com after redirect was disabled');
   assert(nonRedirectedUrl.startsWith('https://www.bilibili.com'), '关闭首页重定向后不再跳转');
 
-  const restorePopup = await newPage(`chrome-extension://${extensionId}/popup/popup.html`);
+  const restorePopup = await newPage(`chrome-extension://${extensionId}/options/options.html`);
   await restorePopup.enablePage();
   await sleep(1000);
   await restorePopup.eval(`(async () => {
@@ -711,7 +746,7 @@ async function testSearchAccess(extensionId) {
   assert(allowedUrl.startsWith('https://search.bilibili.com'), '开启搜索功能时搜索结果页不会被重定向');
   page.close();
 
-  const popup = await newPage(`chrome-extension://${extensionId}/popup/popup.html`);
+  const popup = await newPage(`chrome-extension://${extensionId}/options/options.html`);
   await popup.enablePage();
   await sleep(1000);
   await popup.eval(`(async () => {
@@ -730,7 +765,7 @@ async function testSearchAccess(extensionId) {
   assert(blockedUrl.startsWith('https://t.bilibili.com'), '关闭搜索功能后搜索结果页会回到关注动态');
   blockedPage.close();
 
-  const restorePopup = await newPage(`chrome-extension://${extensionId}/popup/popup.html`);
+  const restorePopup = await newPage(`chrome-extension://${extensionId}/options/options.html`);
   await restorePopup.enablePage();
   await sleep(1000);
   await restorePopup.eval(`(async () => {
@@ -757,6 +792,91 @@ async function saveWhitelist(extensionId, urls) {
   options.close();
 }
 
+async function testIntentAndPlayback(extensionId) {
+  if (LIVE) return;
+  const search = await newPage('https://search.bilibili.com/all?keyword=test');
+  const searchState = await search.eval(`(() => {
+    const visible = id => getComputedStyle(document.getElementById(id)).display !== 'none';
+    const input = document.querySelector('.nav-search-input');
+    const blankAllowed = input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    input.value = '主动搜索';
+    const typedAllowed = input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    return { results: visible('search-results'), filters: visible('search-filters'),
+      trending: visible('search-trending'), suggestions: visible('search-suggest'),
+      following: visible('following-entry'), placeholder: input.placeholder, blankAllowed, typedAllowed, value: input.value };
+  })()`);
+  assert(searchState.results && searchState.filters && searchState.following, '搜索结果、筛选和关注入口正常保留');
+  assert(!searchState.trending && !searchState.suggestions, '搜索页热搜和搜索建议被收起');
+  assert(!searchState.blankAllowed && searchState.typedAllowed && searchState.value === '主动搜索', '空搜索不会打开默认热词，用户输入的搜索仍可提交');
+  assert(searchState.placeholder === '搜索你想看的内容', '搜索框不再展示推荐热词');
+  await search.eval("history.pushState({}, '', '/all')");
+  assert((await waitForPageUrl(search, url => url.startsWith('https://t.bilibili.com'), 'SPA empty search did not redirect')).startsWith('https://t.bilibili.com'), 'SPA 跳到空搜索页也会回到关注');
+  search.close();
+
+  const feed = await newPage('https://t.bilibili.com/');
+  const feedState = await feed.eval(`(() => {
+    const visible = selector => getComputedStyle(document.querySelector(selector)).display !== 'none';
+    return { followed: visible('#followed-post') && visible('#followed-avatar') && visible('#followed-topic'),
+      topics: visible('#feed-topics'), recommend: visible('.bili-dyn-up-recommend'), live: visible('.bili-dyn-live-users') };
+  })()`);
+  assert(feedState.followed && !feedState.topics && !feedState.recommend && !feedState.live, '动态页保留关注内容，收起话题、直播和推荐 UP');
+  feed.close();
+
+  const video = await newPage(VIDEO_URL);
+  const initial = await video.eval(`(() => {
+    document.querySelector('video').dispatchEvent(new Event('ended'));
+    window.playbackMarker = 'keep-position';
+    return { continued: window.nextVideoTriggered === true, autoplayEnabled: window.autoplayEnabled,
+      loginVisible: getComputedStyle(document.getElementById('login-dialog')).display !== 'none', visits: sessionStorage.fixtureVisits };
+  })()`);
+  assert(!initial.continued && initial.autoplayEnabled === false, '播放结束不触发下一条，并关闭播放器真实连播状态');
+  assert(initial.loginVisible, '登录浮层不会被通用浮层选择器误隐藏');
+  const settingsPage = await newPage(`chrome-extension://${extensionId}/options/options.html`);
+  const concurrent = await settingsPage.eval(`(async () => {
+    const responses = await Promise.all([
+      chrome.runtime.sendMessage({ type: 'BILIBILI_LESS_PATCH_SETTINGS', patch: { modules: { comments: false } } }),
+      chrome.runtime.sendMessage({ type: 'BILIBILI_LESS_PATCH_SETTINGS', patch: { modules: { recommendations: false } } })
+    ]);
+    const settings = (await chrome.storage.local.get('settings')).settings;
+    return { ok: responses.every(value => value.ok), comments: settings.modules.comments, recommendations: settings.modules.recommendations };
+  })()`);
+  await sleep(800);
+  assert(concurrent.ok && !concurrent.comments && !concurrent.recommendations, '并发修改两个开关都能保存');
+  const afterChange = await video.eval(`({ marker: window.playbackMarker, visits: sessionStorage.fixtureVisits, comments: getComputedStyle(document.querySelector('.reply-wrap')).display })`);
+  assert(afterChange.marker === 'keep-position' && afterChange.visits === initial.visits, '网络模块变化不会刷新视频或重置页面');
+  assert(afterChange.comments !== 'none', '关闭评论后已打开页面即时恢复评论');
+
+  const draft = await settingsPage.eval(`(async () => {
+    const textarea = document.getElementById('whitelist-allowed-urls');
+    textarea.value = 'https://www.bilibili.com/video/BV*/';
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    document.getElementById('module-danmaku').click();
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return textarea.value;
+  })()`);
+  assert(draft === 'https://www.bilibili.com/video/BV*/', '切换模块不会抹掉未保存的例外页面');
+  const invalid = await settingsPage.eval(`(async () => {
+    document.getElementById('whitelist-allowed-urls').value = 'https://evil.example/';
+    document.getElementById('save-whitelist').click();
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return { error: document.getElementById('whitelist-error').textContent,
+      stored: (await chrome.storage.local.get('settings')).settings.whitelist.allowedUrls };
+  })()`);
+  assert(invalid.error.length > 0 && invalid.stored.length === 0, '错误例外网址会明确提示且不写入设置');
+  await settingsPage.eval(`chrome.runtime.sendMessage({ type: 'BILIBILI_LESS_PATCH_SETTINGS', patch: { enabled: false } })`);
+  await sleep(800);
+  const paused = await video.eval(`(() => {
+    window.nextVideoTriggered = false;
+    const video = document.querySelector('video');
+    video.dispatchEvent(new Event('ended'));
+    return { continued: window.nextVideoTriggered, autoplay: video.hasAttribute('autoplay') && window.autoplayEnabled,
+      styleRemoved: !document.getElementById('bilibili-less-style') };
+  })()`);
+  assert(paused.continued && paused.autoplay && paused.styleRemoved, '暂停扩展会撤销事件拦截、样式和视频属性修改');
+  await settingsPage.eval(`chrome.runtime.sendMessage({ type: 'BILIBILI_LESS_RESET_MODULES' })`);
+  video.close(); settingsPage.close();
+}
+
 async function testWhitelist(extensionId) {
   await saveWhitelist(extensionId, ['https://www.bilibili.com/']);
 
@@ -780,7 +900,7 @@ async function testWhitelist(extensionId) {
 async function main() {
   let browserProcess;
   try {
-    testBackgroundAutoReloadSource();
+    testManifest();
     prepareExtension();
     const browser = findBrowser();
     log(`INFO 使用浏览器: ${browser}`);
@@ -791,12 +911,14 @@ async function main() {
 
     await testPopup(extensionId);
     await testOptionsPage(extensionId);
+    if (process.argv.includes('--ui-only')) return;
     await testRulesetSwitching(extensionId);
     await testVideoPage(extensionId);
     await testSpacePage();
     await testRedirect(extensionId);
     await testSearchAccess(extensionId);
     await testWhitelist(extensionId);
+    await testIntentAndPlayback(extensionId);
 
     log('PASS 自动回归测试完成');
   } finally {
@@ -806,6 +928,7 @@ async function main() {
     await sleep(1000);
     cleanupDir(EXT_DIR);
     cleanupDir(PROFILE_DIR);
+    cleanupDir(TEST_DIR);
   }
 }
 

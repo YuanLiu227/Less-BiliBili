@@ -1,241 +1,107 @@
-// Bilibili Less - Service Worker
-// Keeps page redirects and network rules in sync with the modular settings.
+import './settings.js';
 
-const DEFAULT_MODULES = {
-  dynamic: true,
-  search: true,
-  exploration: true,
-  navigation: true,
-  recommendations: true,
-  comments: true,
-  danmaku: true,
-  ads: true,
-  ending: true,
-  autoplay: true,
-  redirect: true
-};
-
-const DEFAULT_SETTINGS = {
-  enabled: true,
-  modules: { ...DEFAULT_MODULES },
-  whitelist: {
-    allowedUrls: []
-  }
-};
-
-const MODULE_RULESETS = {
-  recommendations: ['ruleset_recommendations'],
-  exploration: ['ruleset_exploration'],
-  ads: ['ruleset_ads']
-};
-
+const {
+  DEFAULT_MODULES, MODULE_RULESETS, FEED_URL, CONTENT_HOSTS, mergeSettings,
+  shouldRedirectUrl, getEnabledRulesets, wildcardSource, parseWhitelist
+} = globalThis.BilibiliLessSettings;
 const ALL_RULESETS = Object.values(MODULE_RULESETS).flat();
-
-const ALLOWED_FULL_HOSTS = new Set([
-  't.bilibili.com',
-  'passport.bilibili.com',
-  'space.bilibili.com',
-  'account.bilibili.com',
-]);
-
-const ALLOWED_PATH_RULES = [
-  { host: 'www.bilibili.com', prefix: '/video/' },
-  { host: 'www.bilibili.com', prefix: '/space/' },
-  { host: 'www.bilibili.com', prefix: '/history' },
-  { host: 'www.bilibili.com', prefix: '/account/history' }
-];
-
-const SEARCH_HOSTS = new Set([
-  'search.bilibili.com'
-]);
-
-const CONTENT_SCRIPT_HOSTS = new Set([
-  't.bilibili.com',
-  'space.bilibili.com',
-  'www.bilibili.com'
-]);
-
-function mergeSettings(settings = {}) {
-  const normalized = { ...settings };
-  delete normalized.preset;
-
-  return {
-    ...DEFAULT_SETTINGS,
-    ...normalized,
-    modules: {
-      ...DEFAULT_MODULES,
-      ...(normalized.modules || {})
-    },
-    whitelist: {
-      ...DEFAULT_SETTINGS.whitelist,
-      ...(normalized.whitelist || {})
-    }
-  };
-}
+let settingsQueue = Promise.resolve();
 
 async function getSettings() {
   const result = await chrome.storage.local.get('settings');
-  return mergeSettings(result.settings || {});
+  return mergeSettings(result.settings);
 }
 
-function isModuleEnabled(settings, module) {
-  return settings.enabled !== false && settings.modules?.[module] !== false;
-}
-
-function wildcardToRegExp(pattern) {
-  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`^${escaped.replace(/\*/g, '.*')}`);
-}
-
-function isUrlWhitelisted(url, settings) {
-  const patterns = settings.whitelist?.allowedUrls || [];
-  return patterns.some(pattern => {
-    if (!pattern || typeof pattern !== 'string') return false;
-    try {
-      return pattern.includes('*')
-        ? wildcardToRegExp(pattern).test(url)
-        : url.startsWith(pattern);
-    } catch (e) {
-      return false;
-    }
+async function syncNetRules(settings) {
+  const enableRulesetIds = getEnabledRulesets(settings);
+  await chrome.declarativeNetRequest.updateEnabledRulesets({
+    enableRulesetIds,
+    disableRulesetIds: ALL_RULESETS.filter(id => !enableRulesetIds.includes(id))
+  });
+  const existing = await chrome.declarativeNetRequest.getDynamicRules();
+  const addRules = settings.enabled ? settings.whitelist.allowedUrls.map((pattern, index) => ({
+    id: 10000 + index,
+    priority: 100,
+    action: { type: 'allowAllRequests' },
+    condition: { regexFilter: wildcardSource(pattern), isUrlFilterCaseSensitive: true, resourceTypes: ['main_frame'] }
+  })) : [];
+  await chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: existing.map(rule => rule.id), addRules
   });
 }
 
-function getEnabledRulesets(settings) {
-  if (settings.enabled === false) return [];
-  return Object.entries(MODULE_RULESETS)
-    .filter(([module]) => isModuleEnabled(settings, module))
-    .flatMap(([, rulesets]) => rulesets);
-}
-
-function getRulesetSignature(settings) {
-  return getEnabledRulesets(settings).slice().sort().join('|');
-}
-
-function didNetworkRulesChange(previousSettings, nextSettings) {
-  return getRulesetSignature(previousSettings) !== getRulesetSignature(nextSettings);
-}
-
-async function syncNetRules() {
-  try {
-    const settings = await getSettings();
-    const enableRulesetIds = getEnabledRulesets(settings);
-    const disableRulesetIds = ALL_RULESETS.filter(id => !enableRulesetIds.includes(id));
-    await chrome.declarativeNetRequest.updateEnabledRulesets({
-      enableRulesetIds,
-      disableRulesetIds
-    });
-  } catch (e) {
-    console.warn('Bilibili Less: failed to sync network rules', e);
-  }
-}
-
-function shouldRedirectUrl(rawUrl, settings) {
-  if (!isModuleEnabled(settings, 'redirect')) return false;
-  if (isUrlWhitelisted(rawUrl, settings)) return false;
-
-  let url;
-  try {
-    url = new URL(rawUrl);
-  } catch (e) {
-    return false;
-  }
-
-  if (!url.hostname.endsWith('bilibili.com')) return false;
-  if (ALLOWED_FULL_HOSTS.has(url.hostname)) return false;
-  if (SEARCH_HOSTS.has(url.hostname) && isModuleEnabled(settings, 'search')) return false;
-
-  return !ALLOWED_PATH_RULES.some(rule =>
-    url.hostname === rule.host && url.pathname.startsWith(rule.prefix)
-  );
-}
-
-function canInjectContentScript(rawUrl) {
-  try {
-    const url = new URL(rawUrl);
-    return CONTENT_SCRIPT_HOSTS.has(url.hostname);
-  } catch (e) {
-    return false;
-  }
-}
-
-function canReloadTab(rawUrl) {
-  try {
-    const url = new URL(rawUrl);
-    return ['http:', 'https:'].includes(url.protocol) && url.hostname.endsWith('bilibili.com');
-  } catch (e) {
-    return false;
-  }
-}
-
-async function applySettingsToTab(tab, settings, options = {}) {
+async function applySettingsToTab(tab, settings) {
   if (!tab.id || !tab.url) return;
-
   if (shouldRedirectUrl(tab.url, settings)) {
-    await chrome.tabs.update(tab.id, { url: 'https://t.bilibili.com' });
+    await chrome.tabs.update(tab.id, { url: FEED_URL });
     return;
   }
-
-  if (options.reloadAfterApply && canReloadTab(tab.url)) {
-    await chrome.tabs.reload(tab.id);
-    return;
-  }
-
-  if (!canInjectContentScript(tab.url)) return;
-
+  if (!CONTENT_HOSTS.includes(new URL(tab.url).hostname)) return;
   try {
-    await chrome.tabs.sendMessage(tab.id, {
-      type: 'BILIBILI_LESS_APPLY_SETTINGS',
-      settings
+    await chrome.tabs.sendMessage(tab.id, { type: 'BILIBILI_LESS_APPLY_SETTINGS', settings });
+  } catch {
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id }, files: ['settings.js', 'content.js']
     });
-  } catch (e) {
-    try {
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['content.js']
-      });
-    } catch (injectError) {
-      console.warn('Bilibili Less: failed to inject content script', injectError);
-    }
   }
 }
 
-async function applySettingsToOpenTabs(settings, options = {}) {
-  try {
-    const tabs = await chrome.tabs.query({ url: ['*://*.bilibili.com/*'] });
-    await Promise.all(tabs.map(tab => applySettingsToTab(tab, settings, options)));
-  } catch (e) {
-    console.warn('Bilibili Less: failed to apply settings to open tabs', e);
-  }
+async function applySettingsToOpenTabs(settings) {
+  const tabs = await chrome.tabs.query({ url: ['*://*.bilibili.com/*'] });
+  const results = await Promise.allSettled(tabs.map(tab => applySettingsToTab(tab, settings)));
+  results.filter(result => result.status === 'rejected')
+    .forEach(result => console.warn('Bilibili Less: page sync failed', result.reason));
 }
 
-chrome.runtime.onStartup.addListener(syncNetRules);
-chrome.runtime.onInstalled.addListener(syncNetRules);
+function scheduleEffects() {
+  const task = settingsQueue.catch(() => {}).then(async () => {
+    const settings = await getSettings();
+    await syncNetRules(settings);
+    await applySettingsToOpenTabs(settings);
+  });
+  settingsQueue = task;
+  task.catch(error => console.error('Bilibili Less: settings sync failed', error));
+  return task;
+}
 
+// Merge UI writes against the latest value, including writes from another window.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (sender.id !== chrome.runtime.id || !['BILIBILI_LESS_PATCH_SETTINGS', 'BILIBILI_LESS_RESET_MODULES'].includes(message?.type)) return;
+  const task = settingsQueue.catch(() => {}).then(async () => {
+    const previous = await getSettings();
+    const patch = message.patch || {};
+    if (patch.whitelist) parseWhitelist(patch.whitelist.allowedUrls.join('\n'));
+    const settings = message.type === 'BILIBILI_LESS_RESET_MODULES'
+      ? mergeSettings({ ...previous, enabled: true, modules: { ...DEFAULT_MODULES } })
+      : mergeSettings({ ...previous, ...patch,
+        modules: { ...previous.modules, ...patch.modules },
+        whitelist: { ...previous.whitelist, ...patch.whitelist } });
+    await syncNetRules(settings);
+    await chrome.storage.local.set({ settings });
+    return settings;
+  });
+  settingsQueue = task;
+  task.then(settings => sendResponse({ ok: true, settings }),
+    error => sendResponse({ ok: false, error: error.message }));
+  return true;
+});
+
+chrome.runtime.onStartup.addListener(scheduleEffects);
+chrome.runtime.onInstalled.addListener(scheduleEffects);
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area !== 'local' || !changes.settings) return;
-  const previousSettings = mergeSettings(changes.settings.oldValue || {});
-  const settings = mergeSettings(changes.settings.newValue || {});
-
-  (async () => {
-    await syncNetRules();
-    await applySettingsToOpenTabs(settings, {
-      reloadAfterApply: didNetworkRulesChange(previousSettings, settings)
-    });
-  })();
+  if (area === 'local' && changes.settings) scheduleEffects();
 });
 
-chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
+async function checkNavigation(details) {
   if (details.frameId !== 0) return;
-
-  let settings;
   try {
-    settings = await getSettings();
-  } catch (e) {
-    settings = mergeSettings();
+    if (shouldRedirectUrl(details.url, await getSettings())) {
+      await chrome.tabs.update(details.tabId, { url: FEED_URL });
+    }
+  } catch (error) {
+    console.warn('Bilibili Less: navigation check failed', error);
   }
-
-  if (shouldRedirectUrl(details.url, settings)) {
-    chrome.tabs.update(details.tabId, { url: 'https://t.bilibili.com' });
-  }
-});
+}
+const navigationFilter = { url: [{ hostEquals: 'bilibili.com' }, { hostSuffix: '.bilibili.com' }] };
+chrome.webNavigation.onBeforeNavigate.addListener(checkNavigation, navigationFilter);
+chrome.webNavigation.onHistoryStateUpdated.addListener(checkNavigation, navigationFilter);

@@ -1,27 +1,10 @@
 // Bilibili Less - Content Script
 // Keeps the intentional path: following feed -> video, while hiding attention traps.
 
-const DEFAULT_MODULES = {
-  dynamic: true,
-  search: true,
-  exploration: true,
-  navigation: true,
-  recommendations: true,
-  comments: true,
-  danmaku: true,
-  ads: true,
-  ending: true,
-  autoplay: true,
-  redirect: true
-};
-
-const DEFAULT_SETTINGS = {
-  enabled: true,
-  modules: { ...DEFAULT_MODULES },
-  whitelist: {
-    allowedUrls: []
-  }
-};
+(() => {
+if (globalThis.__bilibiliLessLoaded) return;
+globalThis.__bilibiliLessLoaded = true;
+const { mergeSettings, isUrlWhitelisted, shouldRedirectUrl, FEED_URL } = globalThis.BilibiliLessSettings;
 
 const MODULE_CLASS = {
   dynamic: 'bilibili-less-hide-dynamic',
@@ -37,10 +20,6 @@ const MODULE_CLASS = {
 const SEARCH_HIDDEN_CLASS = 'bilibili-less-hide-search';
 
 const EXTENSION_CSS = `
-html.bilibili-less-video-page {
-  background-color: var(--bilibili-bg, #0d0d0d) !important;
-}
-
 /* Dynamic page cleanup */
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-list__item .bili-dyn-actions,
 html.bilibili-less-hide-dynamic.bilibili-less-dynamic-page .bili-dyn-card .ops,
@@ -85,78 +64,35 @@ html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="float-nav"
 html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="elevator"],
 html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="backtop"],
 html.bilibili-less-hide-exploration.bilibili-less-video-page [class*="customer"],
-html.bilibili-less-hide-exploration.bilibili-less-space-page a[href*="/relation/follow"],
-html.bilibili-less-hide-exploration.bilibili-less-space-page a[href*="/relation/fans"],
-html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watchlater"],
-html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="watch-later"],
-html.bilibili-less-hide-exploration.bilibili-less-space-page [class*="later-watch"] {
+html.bilibili-less-hide-exploration.bilibili-less-space-page a[href*="/relation/fans"] {
   display: none !important;
 }
 
-/* Navigation entry cleanup */
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="header-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="channel-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="nav-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="nav-link"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="nav-item"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="channel-link"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="channel-item"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="menu-link"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="menu-item"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="header-link"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="header-item"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="top-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="top-tab"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="main-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="primary-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="sub-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="link-item"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="tab-link"],
-html.bilibili-less-hide-navigation.bilibili-less-dynamic-page [class*="tab-item"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__channel,
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .nav-container,
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .header-nav,
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar .nav-link,
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="nav-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-link"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="channel-item"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="menu-link"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="menu-item"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-link"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="header-item"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="top-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="top-tab"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="main-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="primary-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="sub-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="link-item"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="tab-link"],
-html.bilibili-less-hide-navigation.bilibili-less-space-page .bili-header__bar [class*="tab-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__channel,
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar .nav-container,
-html.bilibili-less-hide-navigation.bilibili-less-video-page .header-nav,
-html.bilibili-less-hide-navigation.bilibili-less-video-page .nav-link,
-html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="header-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="nav-menu"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-link"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="channel-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="menu-link"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="menu-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="header-link"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="header-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="top-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="top-tab"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="main-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="primary-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="sub-nav"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="link-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="tab-link"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page .bili-header__bar [class*="tab-item"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="nav-link"],
-html.bilibili-less-hide-navigation.bilibili-less-video-page [class*="nav-item"] {
+/* Hide channel menus; preserve search, following, history and account controls. */
+html.bilibili-less-hide-navigation .bili-header__channel,
+html.bilibili-less-hide-navigation .bili-header__bar .channel-menu {
+  display: none !important;
+}
+
+/* Suggestions are not a search request. Keep actual query results and filters. */
+html.bilibili-less-hide-exploration .bili-header__bar .search-panel,
+html.bilibili-less-hide-exploration .bili-header__bar .search-panel-popover,
+html.bilibili-less-hide-exploration .bili-header__bar .suggest-box,
+html.bilibili-less-hide-exploration .nav-search-box .search-panel,
+html.bilibili-less-hide-exploration .nav-search-box .suggestion,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .trending,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .hot-search,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .search-recommend,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .suggestion,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .search-suggest,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .suggest-wrap,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .search-header .search-panel,
+html.bilibili-less-hide-exploration.bilibili-less-search-page .search-header .search-panel-popover,
+html.bilibili-less-hide-recommendations.bilibili-less-dynamic-page .bili-dyn-up-recommend,
+html.bilibili-less-hide-recommendations.bilibili-less-dynamic-page .bili-dyn-recommend,
+html.bilibili-less-hide-recommendations.bilibili-less-dynamic-page .bili-dyn-topic:not(.bili-dyn-list__item .bili-dyn-topic),
+html.bilibili-less-hide-recommendations.bilibili-less-dynamic-page .bili-dyn-live-users,
+html.bilibili-less-hide-recommendations.bilibili-less-dynamic-page .bili-dyn-sidebar__recommend {
   display: none !important;
 }
 
@@ -304,34 +240,11 @@ const MODULE_SELECTORS = {
     '.bilibili-less-video-page [class*="elevator"]',
     '.bilibili-less-video-page [class*="backtop"]',
     '.bilibili-less-video-page [class*="customer"]',
-    '.bilibili-less-space-page a[href*="/relation/follow"]',
-    '.bilibili-less-space-page a[href*="/relation/fans"]',
-    '.bilibili-less-space-page [class*="watchlater"]',
-    '.bilibili-less-space-page [class*="watch-later"]',
-    '.bilibili-less-space-page [class*="later-watch"]'
+    '.bilibili-less-space-page a[href*="/relation/fans"]'
   ],
   navigation: [
-    '.bilibili-less-dynamic-page .bili-header__channel',
-    '.bilibili-less-dynamic-page .bili-header__bar .nav-container',
-    '.bilibili-less-dynamic-page [class*="header-nav"]',
-    '.bilibili-less-dynamic-page [class*="channel-menu"]',
-    '.bilibili-less-dynamic-page [class*="nav-menu"]',
-    '.bilibili-less-dynamic-page [class*="nav-link"]',
-    '.bilibili-less-dynamic-page [class*="nav-item"]',
-    '.bilibili-less-video-page .bili-header__channel',
-    '.bilibili-less-video-page .bili-header__bar .nav-container',
-    '.bilibili-less-video-page .bili-header__bar [class*="header-nav"]',
-    '.bilibili-less-video-page .bili-header__bar [class*="channel-menu"]',
-    '.bilibili-less-video-page .bili-header__bar [class*="nav-menu"]',
-    '.bilibili-less-video-page .bili-header__bar [class*="nav-link"]',
-    '.bilibili-less-video-page .bili-header__bar [class*="nav-item"]',
-    '.bilibili-less-space-page .bili-header__channel',
-    '.bilibili-less-space-page .bili-header__bar .nav-container',
-    '.bilibili-less-space-page .bili-header__bar [class*="header-nav"]',
-    '.bilibili-less-space-page .bili-header__bar [class*="channel-menu"]',
-    '.bilibili-less-space-page .bili-header__bar [class*="nav-menu"]',
-    '.bilibili-less-space-page .bili-header__bar [class*="nav-link"]',
-    '.bilibili-less-space-page .bili-header__bar [class*="nav-item"]'
+    '.bili-header__channel',
+    '.bili-header__bar .channel-menu'
   ],
   recommendations: [
     '.recommend-list',
@@ -422,55 +335,24 @@ const MODULE_SELECTORS = {
   ]
 };
 
-const BG_COLOR_KEY = 'bilibiliLessBg';
 const hiddenElements = new Set();
 const hiddenElementStyles = new Map();
-let currentSettings = { ...DEFAULT_SETTINGS, modules: { ...DEFAULT_MODULES } };
+let currentSettings = mergeSettings();
 let styleElement = null;
 let observer = null;
-let cleanInterval = null;
+let cleanupTimer = null;
+let settingsReady = false;
 const autoplayHandlers = new Map();
-
-function mergeSettings(settings = {}) {
-  const normalized = { ...settings };
-  delete normalized.preset;
-
-  return {
-    ...DEFAULT_SETTINGS,
-    ...normalized,
-    modules: {
-      ...DEFAULT_MODULES,
-      ...(normalized.modules || {})
-    },
-    whitelist: {
-      ...DEFAULT_SETTINGS.whitelist,
-      ...(normalized.whitelist || {})
-    }
-  };
-}
+const searchPlaceholders = new Map();
+let autoplayControlAttempts = new WeakSet();
+const disabledAutoplayControls = new Set();
 
 function isModuleEnabled(name) {
   return currentSettings.enabled !== false && currentSettings.modules?.[name] !== false;
 }
 
-function wildcardToRegExp(pattern) {
-  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`^${escaped.replace(/\*/g, '.*')}`);
-}
-
 function isCurrentUrlWhitelisted() {
-  const url = window.location.href;
-  const patterns = currentSettings.whitelist?.allowedUrls || [];
-  return patterns.some(pattern => {
-    if (!pattern || typeof pattern !== 'string') return false;
-    try {
-      return pattern.includes('*')
-        ? wildcardToRegExp(pattern).test(url)
-        : url.startsWith(pattern);
-    } catch (e) {
-      return false;
-    }
-  });
+  return isUrlWhitelisted(window.location.href, currentSettings);
 }
 
 function injectCSS() {
@@ -492,12 +374,10 @@ function updatePageClasses() {
   const hostname = window.location.hostname;
   const path = window.location.pathname;
 
-  html.classList.remove('bilibili-less-dynamic-page', 'bilibili-less-video-page', 'bilibili-less-space-page');
-  if (hostname === 't.bilibili.com') html.classList.add('bilibili-less-dynamic-page');
-  if (hostname === 'www.bilibili.com' && path.startsWith('/video/')) {
-    html.classList.add('bilibili-less-video-page');
-  }
-  if (hostname === 'space.bilibili.com') html.classList.add('bilibili-less-space-page');
+  html.classList.toggle('bilibili-less-dynamic-page', hostname === 't.bilibili.com');
+  html.classList.toggle('bilibili-less-video-page', hostname === 'www.bilibili.com' && (path.startsWith('/video/') || path.startsWith('/bangumi/play/')));
+  html.classList.toggle('bilibili-less-space-page', hostname === 'space.bilibili.com' || (hostname === 'www.bilibili.com' && path.startsWith('/space/')));
+  html.classList.toggle('bilibili-less-search-page', hostname === 'search.bilibili.com');
 }
 
 function updateModuleClasses() {
@@ -512,11 +392,13 @@ function hideElement(el) {
   if (!hiddenElementStyles.has(el)) {
     hiddenElementStyles.set(el, {
       display: el.style.display,
-      pointerEvents: el.style.pointerEvents
+      displayPriority: el.style.getPropertyPriority('display'),
+      pointerEvents: el.style.pointerEvents,
+      pointerEventsPriority: el.style.getPropertyPriority('pointer-events')
     });
   }
-  el.style.display = 'none';
-  el.style.pointerEvents = 'none';
+  if (el.style.display !== 'none') el.style.setProperty('display', 'none', 'important');
+  if (el.style.pointerEvents !== 'none') el.style.setProperty('pointer-events', 'none', 'important');
   hiddenElements.add(el);
 }
 
@@ -524,8 +406,8 @@ function restoreAll() {
   hiddenElements.forEach(el => {
     try {
       const previous = hiddenElementStyles.get(el);
-      el.style.display = previous?.display || '';
-      el.style.pointerEvents = previous?.pointerEvents || '';
+      el.style.setProperty('display', previous?.display || '', previous?.displayPriority || '');
+      el.style.setProperty('pointer-events', previous?.pointerEvents || '', previous?.pointerEventsPriority || '');
     } catch (e) {}
   });
   hiddenElements.clear();
@@ -556,18 +438,21 @@ function cleanup() {
   const hostname = window.location.hostname;
   const path = window.location.pathname;
   const isDynamic = hostname === 't.bilibili.com';
-  const isVideo = hostname === 'www.bilibili.com' && path.startsWith('/video/');
-  const isSpace = hostname === 'space.bilibili.com';
+  const isVideo = hostname === 'www.bilibili.com' && (path.startsWith('/video/') || path.startsWith('/bangumi/play/'));
+  const isSpace = hostname === 'space.bilibili.com' || (hostname === 'www.bilibili.com' && path.startsWith('/space/'));
+  const isSearch = hostname === 'search.bilibili.com';
 
   updatePageClasses();
   updateModuleClasses();
-  if (!isDynamic && !isVideo && !isSpace) return;
+  if (!isDynamic && !isVideo && !isSpace && !isSearch) return;
+  hiddenElements.forEach(el => {
+    if (!el.isConnected) { hiddenElements.delete(el); hiddenElementStyles.delete(el); }
+  });
 
-  if (isDynamic) saveBgColor();
-  const shouldCleanNavigation = (isDynamic || isVideo || isSpace) && isModuleEnabled('navigation');
+  const shouldCleanNavigation = isModuleEnabled('navigation');
   if (shouldCleanNavigation) hideNavTextItems();
   if (shouldCleanNavigation) hideLogoDropdown();
-  if ((isDynamic || isVideo || isSpace) && isModuleEnabled('exploration')) hideTooltips();
+  if (isModuleEnabled('exploration')) cleanSearchSuggestions();
 
   Object.keys(MODULE_SELECTORS).forEach(hideSelectorsForModule);
   if (isVideo && isModuleEnabled('exploration')) hideVideoExplorationByContent();
@@ -645,6 +530,7 @@ function getSectionContainer(source) {
 
   while (current && current !== document.body && current !== document.documentElement) {
     try {
+      if (current.querySelector('video, h1, a[href*="/video/"], .video-info-container')) break;
       const rect = current.getBoundingClientRect();
       const style = getComputedStyle(current);
       const isLayoutBox = rect.width >= 180 &&
@@ -658,7 +544,7 @@ function getSectionContainer(source) {
     current = current.parentElement;
   }
 
-  return best || source.closest?.('section, aside, article, div') || source.parentElement;
+  return best || source;
 }
 
 function hideClickableTextItems(root, texts) {
@@ -674,7 +560,7 @@ function hideClickableTextItems(root, texts) {
     while ((node = walker.nextNode())) {
       const element = node.parentElement;
       const target = element?.closest?.('a, button, li, [role="button"], [class*="item"], [class*="entry"]');
-      if (target) hideElement(target);
+      if (target && !target.closest('.video-desc, .video-intro, .video-info-container, [class*="video-description"]')) hideElement(target);
     }
   } catch (e) {}
 }
@@ -684,7 +570,7 @@ function hideSectionsWithText(root, texts) {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
       acceptNode(node) {
         const text = node.textContent?.trim() || '';
-        return texts.some(item => text === item || text.includes(item))
+        return texts.includes(text)
           ? NodeFilter.FILTER_ACCEPT
           : NodeFilter.FILTER_REJECT;
       }
@@ -694,6 +580,8 @@ function hideSectionsWithText(root, texts) {
     while ((node = walker.nextNode())) {
       const element = node.parentElement;
       if (!element) continue;
+      if (!element.closest('h2, h3, h4, h5, h6, [class*="section-title"], [class*="block-title"]')) continue;
+      if (element.closest('a[href*="/video/"], [class*="video-card"], [class*="video-list"]')) continue;
       const target = getSectionContainer(element);
       if (target) hideElement(target);
     }
@@ -702,7 +590,6 @@ function hideSectionsWithText(root, texts) {
 
 function hideVideoExplorationByContent() {
   hideClickableTextItems(document.body, [
-    '动态',
     '微信',
     'QQ',
     'QQ空间',
@@ -717,7 +604,7 @@ function hideVideoExplorationByContent() {
 
 function hideSpaceDistractionsByContent() {
   if (isModuleEnabled('exploration')) {
-    hideClickableTextItems(document.body, ['关注数', '粉丝数', '稍后再看']);
+    hideClickableTextItems(document.body, ['粉丝数']);
   }
 
   if (isModuleEnabled('recommendations')) {
@@ -736,28 +623,29 @@ function updateAutoplayGuards(isVideo) {
   }
 
   document.querySelectorAll('video').forEach(video => {
+    if (!autoplayHandlers.has(video)) autoplayHandlers.set(video, {
+      autoplay: video.autoplay, attribute: video.getAttribute('autoplay')
+    });
     video.autoplay = false;
     video.removeAttribute('autoplay');
-    if (autoplayHandlers.has(video)) return;
-
-    const handler = event => {
-      video.autoplay = false;
-      video.pause();
-      event.stopImmediatePropagation();
-    };
-    video.addEventListener('ended', handler, true);
-    autoplayHandlers.set(video, handler);
   });
-
+  autoplayHandlers.forEach((value, video) => { if (!video.isConnected) autoplayHandlers.delete(video); });
+  document.addEventListener('ended', stopAtVideoEnd, true);
   disableAutoplayControlsByContent();
 }
 
+function stopAtVideoEnd(event) {
+  if (event.target?.tagName !== 'VIDEO' || !isModuleEnabled('autoplay') || isCurrentUrlWhitelisted()) return;
+  event.stopImmediatePropagation();
+  event.target.pause();
+}
+
 function disableAutoplayControlsByContent() {
-  hideClickableTextItems(document.body, ['自动连播', '自动开播', '下一个']);
+  hideClickableTextItems(document.body, ['自动连播', '自动开播']);
 
   try {
     document.querySelectorAll(
-      '[class*="autoplay"], [class*="auto-play"], [class*="next-button"], [class*="next-btn"], [aria-label*="自动连播"], [aria-label*="下一个"]'
+      '[class*="autoplay"], [class*="auto-play"], [aria-label*="自动连播"], [aria-label*="自动开播"]'
     ).forEach(el => {
       const text = [
         el.textContent,
@@ -765,59 +653,63 @@ function disableAutoplayControlsByContent() {
         el.getAttribute('title')
       ].filter(Boolean).join(' ');
 
-      if (!/(自动连播|自动开播|下一个)/.test(text) && !/(autoplay|auto-play|next)/i.test(el.className || '')) return;
+      if (!/(自动连播|自动开播)/.test(text) && !/(autoplay|auto-play)/i.test(el.className || '')) return;
 
-      if ('checked' in el) el.checked = false;
-      if (el.getAttribute('aria-checked') === 'true') el.setAttribute('aria-checked', 'false');
+      const control = el.matches('input, [role="switch"], [role="checkbox"]') ? el
+        : el.querySelector('input[type="checkbox"], [role="switch"], [role="checkbox"], .switch-button') || el;
+      const active = isAutoplayControlOn(control) || isAutoplayControlOn(el);
+      // Click the real switch so the player's state changes, not just its appearance.
+      if (active && !autoplayControlAttempts.has(el) && /(autoplay|auto-play|自动连播|自动开播)/i.test(`${el.className} ${text}`)) {
+        autoplayControlAttempts.add(el);
+        control.click();
+        disabledAutoplayControls.add(control);
+      }
       hideElement(el);
     });
   } catch (e) {}
 }
 
+function isAutoplayControlOn(control) {
+  return control.checked === true || control.getAttribute('aria-checked') === 'true' ||
+    control.getAttribute('aria-pressed') === 'true' ||
+    /(?:^|\s)(?:on|active|checked|is-checked|is-active)(?:\s|$)/.test(control.className || '');
+}
+
 function detachAutoplayGuards() {
-  autoplayHandlers.forEach((handler, video) => {
+  document.removeEventListener('ended', stopAtVideoEnd, true);
+  disabledAutoplayControls.forEach(control => {
+    if (control.isConnected && !isAutoplayControlOn(control)) control.click();
+  });
+  disabledAutoplayControls.clear();
+  autoplayHandlers.forEach((previous, video) => {
     try {
-      video.removeEventListener('ended', handler, true);
+      video.autoplay = previous.autoplay;
+      if (previous.attribute === null) video.removeAttribute('autoplay');
+      else video.setAttribute('autoplay', previous.attribute);
     } catch (e) {}
   });
   autoplayHandlers.clear();
+  autoplayControlAttempts = new WeakSet();
+}
+
+function scheduleCleanup() {
+  if (cleanupTimer !== null) return;
+  cleanupTimer = setTimeout(() => { cleanupTimer = null; cleanup(); }, 100);
 }
 
 function startObserver() {
   if (observer) observer.disconnect();
   if (!document.body) return;
-  observer = new MutationObserver(() => cleanup());
-  observer.observe(document.body, { childList: true, subtree: true });
-}
-
-function saveBgColor() {
-  if (window.location.hostname !== 't.bilibili.com') return;
-  try {
-    const color = getComputedStyle(document.body).backgroundColor;
-    if (color && color !== 'rgba(0,0,0,0)' && color !== 'transparent') {
-      chrome.storage.local.set({ [BG_COLOR_KEY]: color });
-    }
-  } catch (e) {}
-}
-
-async function applyBgColor() {
-  if (window.location.hostname !== 'www.bilibili.com' ||
-      !window.location.pathname.startsWith('/video/')) return;
-  try {
-    const result = await chrome.storage.local.get(BG_COLOR_KEY);
-    if (result[BG_COLOR_KEY]) {
-      document.documentElement.style.setProperty('--bilibili-bg', result[BG_COLOR_KEY]);
-    }
-  } catch (e) {}
+  observer = new MutationObserver(scheduleCleanup);
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true,
+    attributeFilter: ['class', 'aria-checked', 'aria-pressed', 'autoplay'] });
 }
 
 const NAV_TEXTS = ['首页', '番剧', '直播', '游戏中心', '会员购', '漫画', '赛事', '大会', '创作中心'];
 
 function hideNavTextItems() {
   try {
-    const headerArea = document.querySelector(
-      '[class*="header"], [class*="nav"], [class*="channel"], nav, header'
-    );
+    const headerArea = document.querySelector('.bili-header__bar, .mini-header, header, nav');
     if (!headerArea) return;
 
     NAV_TEXTS.forEach(text => {
@@ -841,7 +733,7 @@ function hideNavTextItems() {
 
 function hideLogoDropdown() {
   try {
-    const header = document.querySelector('[class*="header"], [class*="nav"], nav, header');
+    const header = document.querySelector('.bili-header__bar, .mini-header, header, nav');
     if (!header) return;
 
     const logoLink = header.querySelector(
@@ -853,39 +745,51 @@ function hideLogoDropdown() {
       if (child === logoLink || child.contains(logoLink)) return;
       const hasIcon = child.querySelector('svg, img, i, [class*="icon"]');
       const isSmall = child.getBoundingClientRect().width < 60;
-      if (hasIcon && (child.tagName === 'BUTTON' || child.tagName === 'SPAN' ||
-          child.tagName === 'DIV' || isSmall)) {
+      if (hasIcon && isSmall && child.tagName === 'BUTTON' && !child.querySelector('input')) {
         hideElement(child);
       }
     });
   } catch (e) {}
 }
 
-function hideTooltips() {
-  try {
-    document.querySelectorAll(
-      'body > [class*="tooltip"], body > [class*="popup"], body > [class*="tip"], ' +
-      'body > [class*="hover"], body > [class*="float"], body > [class*="overlay"], [role="tooltip"]'
-    ).forEach(el => {
-      const style = getComputedStyle(el);
-      if (style.position === 'fixed' || style.position === 'absolute') hideElement(el);
+function cleanSearchSuggestions() {
+  searchPlaceholders.forEach((value, input) => { if (!input.isConnected) searchPlaceholders.delete(input); });
+  document.querySelectorAll('.bili-header__bar input, .nav-search-input, .search-input-el, .search-input')
+    .forEach(input => {
+      if (input.tagName !== 'INPUT') return;
+      if (!searchPlaceholders.has(input)) searchPlaceholders.set(input, input.getAttribute('placeholder'));
+      if (input.getAttribute('placeholder') !== '搜索你想看的内容') input.setAttribute('placeholder', '搜索你想看的内容');
     });
-  } catch (e) {}
+}
+
+function guardEmptyNativeSearch(event) {
+  if (!isModuleEnabled('exploration') || isCurrentUrlWhitelisted()) return;
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const wrapper = target.closest('.nav-search-box, .bili-header__search, .search-input-wrap, .search-bar');
+  if (!wrapper) return;
+  const input = wrapper.querySelector('input');
+  if (!input || input.value.trim()) return;
+  const isSearchAction = (event.type === 'keydown' && event.key === 'Enter' && target === input) ||
+    (event.type === 'click' && target.closest('.nav-search-btn, .search-btn, .search-button, button[type="submit"]')) ||
+    event.type === 'submit';
+  if (!isSearchAction) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  input.focus();
+}
+['keydown', 'click', 'submit'].forEach(type => document.addEventListener(type, guardEmptyNativeSearch, true));
+
+function restoreSearchPlaceholders() {
+  searchPlaceholders.forEach((value, input) => {
+    if (value === null) input.removeAttribute('placeholder');
+    else input.setAttribute('placeholder', value);
+  });
+  searchPlaceholders.clear();
 }
 
 function isAllowedPage() {
-  if (isCurrentUrlWhitelisted()) return true;
-  if (currentSettings.enabled === false || !isModuleEnabled('redirect')) return true;
-
-  const hostname = window.location.hostname;
-  const path = window.location.pathname;
-  if (hostname === 'www.bilibili.com') {
-    return path.startsWith('/video/') ||
-           path.startsWith('/space/') ||
-           path.startsWith('/history') ||
-           path.startsWith('/account/history');
-  }
-  return true;
+  return !shouldRedirectUrl(window.location.href, currentSettings);
 }
 
 function setupSpaHandler() {
@@ -893,30 +797,23 @@ function setupSpaHandler() {
   const checkUrlChange = () => {
     if (window.location.href === lastUrl) return;
     lastUrl = window.location.href;
-    setTimeout(() => {
-      if (currentSettings.enabled !== false && !isCurrentUrlWhitelisted()) resumeExtension();
-      else pauseExtension();
-      cleanup();
-    }, 100);
-    if (!isAllowedPage()) window.location.href = 'https://t.bilibili.com';
+    restoreAll();
+    restoreSearchPlaceholders();
+    if (!isAllowedPage()) { window.location.replace(FEED_URL); return; }
+    if (currentSettings.enabled !== false && !isCurrentUrlWhitelisted()) resumeExtension();
+    else pauseExtension();
   };
 
-  const origPush = history.pushState;
-  const origReplace = history.replaceState;
-  history.pushState = function (...args) {
-    origPush.apply(this, args);
-    checkUrlChange();
-  };
-  history.replaceState = function (...args) {
-    origReplace.apply(this, args);
-    checkUrlChange();
-  };
   window.addEventListener('popstate', checkUrlChange);
+  // Content scripts have an isolated history object. A cheap URL check also
+  // handles in-site navigation, including leaving a whitelisted page.
+  setInterval(checkUrlChange, 800);
 }
 
 function applySettings(nextSettings) {
   currentSettings = mergeSettings(nextSettings || {});
   restoreAll();
+  restoreSearchPlaceholders();
 
   if (currentSettings.enabled === false || isCurrentUrlWhitelisted()) {
     pauseExtension();
@@ -924,37 +821,33 @@ function applySettings(nextSettings) {
   }
 
   if (!isAllowedPage()) {
-    window.location.href = 'https://t.bilibili.com';
+    window.location.replace(FEED_URL);
     return;
   }
 
   resumeExtension();
-  cleanup();
 }
 
 function pauseExtension() {
   const html = document.documentElement;
   html.classList.add('bilibili-less-paused');
-  html.classList.remove('bilibili-less-dynamic-page', 'bilibili-less-video-page', 'bilibili-less-space-page');
+  html.classList.remove('bilibili-less-dynamic-page', 'bilibili-less-video-page', 'bilibili-less-space-page', 'bilibili-less-search-page');
   Object.values(MODULE_CLASS).forEach(className => html.classList.remove(className));
   html.classList.remove(SEARCH_HIDDEN_CLASS);
   removeCSS();
   restoreAll();
+  restoreSearchPlaceholders();
   detachAutoplayGuards();
   if (observer) observer.disconnect();
-  if (cleanInterval) {
-    clearInterval(cleanInterval);
-    cleanInterval = null;
-  }
+  clearTimeout(cleanupTimer);
+  cleanupTimer = null;
 }
 
 function resumeExtension() {
   document.documentElement.classList.remove('bilibili-less-paused');
   injectCSS();
   cleanup();
-  applyBgColor();
   startObserver();
-  if (!cleanInterval) cleanInterval = setInterval(cleanup, 2000);
 }
 
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -975,6 +868,7 @@ async function init() {
   } catch (e) {
     currentSettings = mergeSettings();
   }
+  settingsReady = true;
 
   setupSpaHandler();
 
@@ -984,15 +878,17 @@ async function init() {
   }
 
   if (!isAllowedPage()) {
-    window.location.href = 'https://t.bilibili.com';
+    window.location.replace(FEED_URL);
     return;
   }
 
   resumeExtension();
 }
 
-updatePageClasses();
-
-injectCSS();
-if (document.body) init();
-else document.addEventListener('DOMContentLoaded', init);
+// Read preferences at document_start so distractions can be hidden before the
+// site renders; wait for the body only when attaching its mutation observer.
+init();
+document.addEventListener('DOMContentLoaded', () => {
+  if (settingsReady && currentSettings.enabled && !isCurrentUrlWhitelisted()) resumeExtension();
+});
+})();

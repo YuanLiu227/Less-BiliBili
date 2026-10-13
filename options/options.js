@@ -1,160 +1,44 @@
-// Bilibili Less - Options page
-
-const DEFAULT_MODULES = {
-  dynamic: true,
-  search: true,
-  exploration: true,
-  navigation: true,
-  recommendations: true,
-  comments: true,
-  danmaku: true,
-  ads: true,
-  ending: true,
-  autoplay: true,
-  redirect: true
-};
-
-const DEFAULTS = {
-  enabled: true,
-  modules: { ...DEFAULT_MODULES },
-  whitelist: {
-    allowedUrls: []
-  }
-};
-
-const MODULE_INPUTS = {
-  dynamic: 'module-dynamic',
-  search: 'module-search',
-  exploration: 'module-exploration',
-  navigation: 'module-navigation',
-  recommendations: 'module-recommendations',
-  comments: 'module-comments',
-  danmaku: 'module-danmaku',
-  ads: 'module-ads',
-  ending: 'module-ending',
-  autoplay: 'module-autoplay',
-  redirect: 'module-redirect'
-};
-
-const MODULE_RULESETS = {
-  recommendations: ['ruleset_recommendations'],
-  exploration: ['ruleset_exploration'],
-  ads: ['ruleset_ads']
-};
-
-const ALL_RULESETS = Object.values(MODULE_RULESETS).flat();
-
-let settings = null;
-let statusTimer = null;
-
-function mergeSettings(value = {}) {
-  const normalized = { ...value };
-  delete normalized.preset;
-
-  return {
-    ...DEFAULTS,
-    ...normalized,
-    modules: {
-      ...DEFAULT_MODULES,
-      ...(normalized.modules || {})
-    },
-    whitelist: {
-      ...DEFAULTS.whitelist,
-      ...(normalized.whitelist || {})
-    }
-  };
-}
-
-function getEnabledRulesets(value) {
-  if (value.enabled === false) return [];
-  return Object.entries(MODULE_RULESETS)
-    .filter(([module]) => value.modules[module] !== false)
-    .flatMap(([, rulesets]) => rulesets);
-}
-
-async function syncNetRules(value) {
-  const enableRulesetIds = getEnabledRulesets(value);
-  const disableRulesetIds = ALL_RULESETS.filter(id => !enableRulesetIds.includes(id));
-  await chrome.declarativeNetRequest.updateEnabledRulesets({
-    enableRulesetIds,
-    disableRulesetIds
-  });
-}
-
-async function loadSettings() {
-  const result = await chrome.storage.local.get('settings');
-  return mergeSettings(result.settings || {});
-}
-
-function showStatus(text) {
-  const status = document.getElementById('save-status');
-  status.textContent = text;
-  clearTimeout(statusTimer);
-  statusTimer = setTimeout(() => {
-    status.textContent = '已同步';
-  }, 1400);
-}
-
-function render(value) {
-  document.getElementById('enabled').checked = value.enabled !== false;
-  Object.entries(MODULE_INPUTS).forEach(([module, inputId]) => {
-    document.getElementById(inputId).checked = value.modules[module] !== false;
-  });
-  document.getElementById('whitelist-allowed-urls').value =
-    (value.whitelist.allowedUrls || []).join('\n');
-}
-
-async function save(nextSettings) {
-  settings = mergeSettings(nextSettings);
-  await chrome.storage.local.set({ settings });
-  await syncNetRules(settings);
-  render(settings);
-  showStatus('已保存');
-}
-
-function readWhitelistTextarea() {
-  return document.getElementById('whitelist-allowed-urls')
-    .value
-    .split('\n')
-    .map(line => line.trim())
-    .filter(Boolean);
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
-  settings = await loadSettings();
-  render(settings);
-
-  document.getElementById('enabled').addEventListener('change', async event => {
-    await save({ ...settings, enabled: event.target.checked });
+  const textarea = document.getElementById('whitelist-allowed-urls');
+  const errorText = document.getElementById('whitelist-error');
+  let dirty = false;
+  const controller = await createSettingsUI({
+    render(settings) {
+      // Changing a module must not erase an unfinished exception-page edit.
+      if (!dirty) textarea.value = settings.whitelist.allowedUrls.join('\n');
+    },
+    status(text, error = false) {
+      const el = document.getElementById('save-status');
+      el.textContent = text;
+      el.classList.toggle('error', error);
+    }
   });
-
-  Object.entries(MODULE_INPUTS).forEach(([module, inputId]) => {
-    document.getElementById(inputId).addEventListener('change', async event => {
-      await save({
-        ...settings,
-        modules: {
-          ...settings.modules,
-          [module]: event.target.checked
-        }
-      });
-    });
+  if (!controller) return;
+  textarea.addEventListener('input', () => {
+    dirty = true;
+    errorText.textContent = '';
+    textarea.removeAttribute('aria-invalid');
   });
-
-  document.getElementById('save-whitelist').addEventListener('click', async () => {
-    await save({
-      ...settings,
-      whitelist: {
-        ...settings.whitelist,
-        allowedUrls: readWhitelistTextarea()
+  document.getElementById('save-whitelist').addEventListener('click', async event => {
+    const draft = textarea.value;
+    try {
+      const allowedUrls = BilibiliLessSettings.parseWhitelist(draft);
+      event.target.disabled = true;
+      await controller.write({ whitelist: { allowedUrls } });
+      if (textarea.value === draft) {
+        dirty = false;
+        textarea.value = controller.getSettings().whitelist.allowedUrls.join('\n');
       }
-    });
+      errorText.textContent = '';
+      textarea.removeAttribute('aria-invalid');
+    } catch (error) {
+      errorText.textContent = error.message;
+      textarea.setAttribute('aria-invalid', 'true');
+    } finally { event.target.disabled = false; }
   });
-
-  document.getElementById('reset-modules').addEventListener('click', async () => {
-    await save({
-      ...settings,
-      enabled: true,
-      modules: { ...DEFAULT_MODULES }
-    });
+  document.getElementById('reset-modules').addEventListener('click', async event => {
+    event.target.disabled = true;
+    try { await controller.write({}, true); } catch { /* Error remains visible. */ }
+    finally { event.target.disabled = false; }
   });
 });

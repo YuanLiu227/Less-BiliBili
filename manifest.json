@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Bilibili Less",
-  "version": "1.2.0",
-  "description": "保留关注动态和正常播放体验，隐藏推荐、评论、弹幕、广告等注意力干扰。",
+  "version": "1.3.0",
+  "description": "只看关注，主动搜索。隐藏推荐、热搜和推广，播放结束即停下。",
   "homepage_url": "https://github.com/YuanLiu227/Less-BiliBili",
 
   "icons": {
@@ -33,9 +33,10 @@
       "matches": [
         "*://t.bilibili.com/*",
         "*://space.bilibili.com/*",
-        "*://www.bilibili.com/*"
+        "*://www.bilibili.com/*",
+        "*://search.bilibili.com/*"
       ],
-      "js": ["content.js"],
+      "js": ["settings.js", "content.js"],
       "run_at": "document_start",
       "all_frames": false
     }

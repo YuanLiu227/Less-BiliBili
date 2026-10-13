@@ -2,92 +2,41 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=340">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="popup.css">
   <title>Bilibili Less</title>
 </head>
 <body>
   <main class="panel">
     <header class="header">
-      <div>
-        <h1>Bilibili Less</h1>
-        <p>保留主动观看，收起注意力干扰。</p>
-      </div>
-      <span class="status-dot" id="statusDot" aria-hidden="true"></span>
+      <img src="../icons/icon48.png" width="32" height="32" alt="">
+      <div><h1>Bilibili Less</h1><p>只看关注，主动搜索。</p></div>
     </header>
-
-    <section class="section">
+    <fieldset id="settings-controls" disabled>
       <label class="switch-row primary">
-        <span>
-          <strong>启用扩展</strong>
-          <small id="statusText">正在保护浏览路径</small>
-        </span>
-        <input type="checkbox" id="enabled" checked>
+        <span><strong>减少干扰</strong><small id="statusText">正在读取设置…</small></span>
+        <input type="checkbox" id="enabled" role="switch">
       </label>
-    </section>
-
-    <section class="section">
-      <h2>快速开关</h2>
-      <label class="switch-row">
-        <span>
-          <strong>开启搜索功能</strong>
-          <small>显示搜索栏并允许进入搜索结果页</small>
-        </span>
-        <input type="checkbox" id="module-search" checked>
-      </label>
-
-      <label class="switch-row">
-        <span>
-          <strong>隐藏右侧推荐</strong>
-          <small>隐藏视频页右侧推荐、相关视频和部分推荐接口</small>
-        </span>
-        <input type="checkbox" id="module-recommendations" checked>
-      </label>
-
-      <label class="switch-row">
-        <span>
-          <strong>隐藏评论区</strong>
-          <small>隐藏视频页评论区域</small>
-        </span>
-        <input type="checkbox" id="module-comments" checked>
-      </label>
-
-      <label class="switch-row">
-        <span>
-          <strong>隐藏弹幕</strong>
-          <small>隐藏弹幕层、弹幕开关、输入框和弹幕列表</small>
-        </span>
-        <input type="checkbox" id="module-danmaku" checked>
-      </label>
-
-      <label class="switch-row">
-        <span>
-          <strong>禁用自动连播</strong>
-          <small>视频自然结束后不自动播放下一个内容</small>
-        </span>
-        <input type="checkbox" id="module-autoplay" checked>
-      </label>
-
-      <label class="switch-row">
-        <span>
-          <strong>隐藏广告和推广</strong>
-          <small>隐藏广告、活动、下载提示、直播和游戏推广</small>
-        </span>
-        <input type="checkbox" id="module-ads" checked>
-      </label>
-
-      <label class="switch-row">
-        <span>
-          <strong>首页跳到关注动态</strong>
-          <small>访问首页或分区页时自动跳转到关注动态</small>
-        </span>
-        <input type="checkbox" id="module-redirect" checked>
-      </label>
-    </section>
-
-    <button type="button" class="options-link" id="open-options">打开完整设置</button>
-    <p class="note">更多动态页、导航和播放结束推荐设置，可在完整设置中调整。</p>
+      <section class="entry-section" aria-label="主动观看">
+        <a class="feed-button" href="https://t.bilibili.com/" target="_blank" rel="noopener">查看关注动态 <span aria-hidden="true">↗</span></a>
+        <form id="search-form" class="search-form">
+          <label class="sr-only" for="search-keyword">搜索你想看的内容</label>
+          <input id="search-keyword" type="search" placeholder="搜索你想看的内容" autocomplete="off" required maxlength="200">
+          <button id="search-submit" type="submit">搜索</button>
+        </form>
+        <p class="search-note" id="search-note">输入关键词，直接进入搜索结果。</p>
+        <a class="history-link" href="https://www.bilibili.com/account/history" target="_blank" rel="noopener">观看历史 <span aria-hidden="true">↗</span></a>
+      </section>
+      <section class="preferences" aria-label="观看偏好">
+        <label class="switch-row"><span><strong>隐藏评论</strong></span><input type="checkbox" id="module-comments" role="switch"></label>
+        <label class="switch-row"><span><strong>隐藏弹幕</strong></span><input type="checkbox" id="module-danmaku" role="switch"></label>
+      </section>
+    </fieldset>
+    <p class="protection-summary" id="protection-summary">推荐、热搜和自动连播默认关闭。</p>
+    <footer><button type="button" class="options-link" id="open-options">更多设置 <span aria-hidden="true">→</span></button><span id="save-status" role="status" aria-live="polite">正在读取…</span></footer>
   </main>
+  <script src="../settings.js"></script>
+  <script src="../settings-ui.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
